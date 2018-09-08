@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace mssql_exporter.server
+﻿namespace mssql_exporter.core
 {
     public static class CounterExtensions
     {
         public static void Set(this Prometheus.Counter counter, double value)
         {
-            if(counter.Value < value)
+            if (counter.Value < value)
             {
                 counter.Inc(value - counter.Value);
             }

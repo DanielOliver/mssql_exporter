@@ -5,7 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using mssql_exporter.core;
 using Prometheus;
+using Prometheus.Advanced;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace mssql_exporter.server
 {
@@ -29,17 +31,13 @@ namespace mssql_exporter.server
             IConfigure configurationBinding = new ConfigurationOptions();
             config.Bind(configurationBinding);
 
+
             var filePath = configurationBinding.MetricsConfigurationFile;
             var fileText = System.IO.File.ReadAllText(filePath);
-            var parserResults = core.config.Parser.FromJson(fileText);
-            foreach (var item in parserResults.Queries)
-            {
-                System.Console.WriteLine($"{item.Name} - {item.QueryUsage} - {item.Query}");
-            }
+            //var fileText = System.IO.File.ReadAllText(@"C:\Users\Daniel\Development\mssql_exporter\test.json");
+            var metricFile = core.config.Parser.FromJson(fileText);
+            ConfigurePrometheus(configurationBinding, metricFile);
 
-
-            // Clear prometheus default metrics.
-            Prometheus.Advanced.DefaultCollectorRegistry.Instance.Clear();
 
             CreateWebHostBuilder(args, configurationBinding).Build().Run();
         }
@@ -52,6 +50,22 @@ namespace mssql_exporter.server
             return WebHost.CreateDefaultBuilder(args)
                 .Configure(app => app.UseMetricServer(defaultPath))
                 .UseUrls($"http://*:{configurationBinding.ServerPort}");
+        }
+
+        public static IEnumerable<IQuery> ConfigureMetrics(core.config.MetricFile metricFile, MetricFactory metricFactory)
+        {
+            return metricFile.Queries.Select(x => x.GetSpecificQuery(metricFactory));
+        }
+
+        public static void ConfigurePrometheus(IConfigure configure, core.config.MetricFile metricFile)
+        {
+            // Clear prometheus default metrics.
+            Prometheus.Advanced.DefaultCollectorRegistry.Instance.Clear();
+
+
+            var collector = new OnDemandCollector("Server=tcp:testworld.database.windows.net,1433;Initial Catalog=db1;Persist Security Info=False;User ID=admin234234;Password=JKHKJ*&*(&hjko87;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
+                x => ConfigureMetrics(metricFile, x));
+            Prometheus.Advanced.DefaultCollectorRegistry.Instance.RegisterOnDemandCollectors(collector);
         }
     }
 }

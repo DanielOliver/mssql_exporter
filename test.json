@@ -1,14 +1,21 @@
 {
     "Queries": [
         {
-            "Name": "one",
-            "Query": "SELECT SYSDATE",
-            "Usage": "CountersWithLabels",
+            "Name": "Process_Status",
+            "Query": "SELECT status, COUNT(*) count FROM sys.sysprocesses GROUP BY status",
+            "Description": "Counts the number of processes per status",
+            "Usage": "GaugesWithLabels",
             "Columns": [
                 {
-                    "Name": "name1",
-                    "Label": "label234",
-                    "Usage": "counter"
+                    "Name": "status",
+                    "Label": "status",
+                    "Usage": "GaugeLabel",
+                    "Order": 0
+                },
+                {
+                    "Name": "count",
+                    "Label": "count",
+                    "Usage": "Gauge"
                 }
             ]
         }
