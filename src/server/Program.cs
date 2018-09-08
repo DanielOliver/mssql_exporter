@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using mssql_exporter.core;
 using Prometheus;
-using Prometheus.Advanced;
 using System.Collections.Generic;
 
 namespace mssql_exporter.server
@@ -30,7 +29,8 @@ namespace mssql_exporter.server
             IConfigure configurationBinding = new ConfigurationOptions();
             config.Bind(configurationBinding);
 
-            DefaultCollectorRegistry.Instance.Clear();
+            // Clear prometheus default metrics.
+            Prometheus.Advanced.DefaultCollectorRegistry.Instance.Clear();
 
             CreateWebHostBuilder(args, configurationBinding).Build().Run();
         }
