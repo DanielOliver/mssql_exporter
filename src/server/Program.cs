@@ -37,7 +37,8 @@ namespace mssql_exporter.server
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args, IConfigure configurationBinding)
         {
-            var defaultPath = string.IsNullOrWhiteSpace(configurationBinding.ServerPath) ? "/metrics" : "/" + configurationBinding.ServerPath.Replace("/", "");
+            var defaultPath = "/" + configurationBinding.ServerPath.Replace("/", "");
+            if (defaultPath.Equals("/")) defaultPath = string.Empty;
 
             return WebHost.CreateDefaultBuilder(args)
                 .Configure(app => app.UseMetricServer(defaultPath))
