@@ -29,6 +29,15 @@ namespace mssql_exporter.server
             IConfigure configurationBinding = new ConfigurationOptions();
             config.Bind(configurationBinding);
 
+            var filePath = configurationBinding.MetricsConfigurationFile;
+            var fileText = System.IO.File.ReadAllText(filePath);
+            var parserResults = core.config.Parser.FromJson(fileText);
+            foreach (var item in parserResults.Queries)
+            {
+                System.Console.WriteLine($"{item.Name} - {item.QueryUsage} - {item.Query}");
+            }
+
+
             // Clear prometheus default metrics.
             Prometheus.Advanced.DefaultCollectorRegistry.Instance.Clear();
 

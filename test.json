@@ -1,0 +1,16 @@
+{
+    "Queries": [
+        {
+            "Name": "one",
+            "Query": "SELECT SYSDATE",
+            "Usage": "CountersWithLabels",
+            "Columns": [
+                {
+                    "Name": "name1",
+                    "Label": "label234",
+                    "Usage": "counter"
+                }
+            ]
+        }
+    ]
+}
