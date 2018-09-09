@@ -15,6 +15,29 @@ namespace mssql_exporter.server
     {
         public static void Main(string[] args)
         {
+            if(args.Length >= 1 && args[0].Equals("serve", System.StringComparison.InvariantCultureIgnoreCase))
+            {
+                RunWebServer(args.Skip(1).ToArray());
+            }
+            else
+            {
+                Help();
+            }
+        }
+
+        public static void Help()
+        {
+            System.Console.WriteLine("Commands");
+            System.Console.WriteLine("   help");
+            System.Console.WriteLine("   serve");
+            System.Console.WriteLine("      -DataSource (Connection String)");
+            System.Console.WriteLine("      -ConfigFile (/srv/metrics/test.json)");
+            System.Console.WriteLine("      -ServerPath (/metrics)");
+            System.Console.WriteLine("      -ServerPort (80)");
+        }
+
+        public static void RunWebServer(string[] args)
+        {
             var switchMappings = new Dictionary<string, string>
             {
                 { "-DataSource", "DatabaseConnectionString" },
@@ -37,8 +60,7 @@ namespace mssql_exporter.server
             //var fileText = System.IO.File.ReadAllText(@"C:\Users\Daniel\Development\mssql_exporter\test.json");
             var metricFile = core.config.Parser.FromJson(fileText);
             ConfigurePrometheus(configurationBinding, metricFile);
-
-
+            
             CreateWebHostBuilder(args, configurationBinding).Build().Run();
         }
 
@@ -54,7 +76,7 @@ namespace mssql_exporter.server
 
         public static IEnumerable<IQuery> ConfigureMetrics(core.config.MetricFile metricFile, MetricFactory metricFactory)
         {
-            return metricFile.Queries.Select(x => x.GetSpecificQuery(metricFactory));
+            return metricFile.Queries.Select(x => MetricQueryFactory.GetSpecificQuery(metricFactory, x));
         }
 
         public static void ConfigurePrometheus(IConfigure configure, core.config.MetricFile metricFile)

@@ -1,10 +1,9 @@
-﻿using System;
+﻿using mssql_exporter.core;
+using Prometheus.Advanced;
+using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using mssql_exporter.core;
-using Prometheus.Advanced;
 
 namespace mssql_exporter.server
 {
@@ -29,18 +28,7 @@ namespace mssql_exporter.server
 
         public void UpdateMetrics()
         {
-            using (var sqlConnection = new SqlConnection(sqlConnectionString))
-            {
-                try
-                {
-                    sqlConnection.Open();
-                }
-                catch (Exception e)
-                {
-                    throw new ScrapeFailedException("Failed to open SQL Connection", e);
-                }
-                Task.WaitAll(metrics.Select(x => x.MeasureWithConnection(sqlConnection)).ToArray());
-            }
+            Task.WaitAll(metrics.Select(x => x.MeasureWithConnection(sqlConnectionString)).ToArray());
         }
     }
 }

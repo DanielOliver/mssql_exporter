@@ -7,22 +7,27 @@ namespace mssql_exporter.core
 {
     public static class IQueryExtensions
     {
-        public static Task MeasureWithConnection(this IQuery query, SqlConnection connection)
+        public static Task MeasureWithConnection(this IQuery query, string sqlConnectionString)
         {
             return Task.Run(() =>
             {
-                using (var dataset = new DataSet())
+                using (var sqlConnection = new SqlConnection(sqlConnectionString))
                 {
-                    using (var command = new SqlCommand(query.Query, connection))
-                    {
-                        using (SqlDataAdapter adapter = new SqlDataAdapter
-                        {
-                            SelectCommand = command
-                        })
-                        {
-                            adapter.Fill(dataset);
+                    sqlConnection.Open();
 
-                            query.Measure(dataset);
+                    using (var dataset = new DataSet())
+                    {
+                        using (var command = new SqlCommand(query.Query, sqlConnection))
+                        {
+                            using (SqlDataAdapter adapter = new SqlDataAdapter
+                            {
+                                SelectCommand = command
+                            })
+                            {
+                                adapter.Fill(dataset);
+
+                                query.Measure(dataset);
+                            }
                         }
                     }
                 }
