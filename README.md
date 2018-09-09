@@ -14,3 +14,7 @@ MSSQL Exporter for Prometheus
 
 Open http://localhost/metrics
 
+## Example Image
+
+![Example](docs/example.png)
+
