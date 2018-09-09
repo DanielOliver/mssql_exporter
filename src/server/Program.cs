@@ -57,7 +57,6 @@ namespace mssql_exporter.server
 
             var filePath = configurationBinding.MetricsConfigurationFile;
             var fileText = System.IO.File.ReadAllText(filePath);
-            //var fileText = System.IO.File.ReadAllText(@"C:\Users\Daniel\Development\mssql_exporter\test.json");
             var metricFile = core.config.Parser.FromJson(fileText);
             ConfigurePrometheus(configurationBinding, metricFile);
             
@@ -84,8 +83,7 @@ namespace mssql_exporter.server
             // Clear prometheus default metrics.
             Prometheus.Advanced.DefaultCollectorRegistry.Instance.Clear();
 
-
-            var collector = new OnDemandCollector("Server=tcp:testworld.database.windows.net,1433;Initial Catalog=db1;Persist Security Info=False;User ID=admin234234;Password=JKHKJ*&*(&hjko87;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
+            var collector = new OnDemandCollector(configure.DatabaseConnectionString,
                 x => ConfigureMetrics(metricFile, x));
             Prometheus.Advanced.DefaultCollectorRegistry.Instance.RegisterOnDemandCollectors(collector);
         }
