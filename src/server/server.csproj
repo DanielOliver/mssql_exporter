@@ -2,13 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>mssql_exporter.server</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>mssql_exporter</AssemblyName>
     <RootNamespace>mssql_exporter.server</RootNamespace>
+    <RuntimeIdentifiers>win-x86;win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
+  </ItemGroup> 
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
