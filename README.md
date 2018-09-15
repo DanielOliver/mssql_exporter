@@ -43,7 +43,8 @@ MSSQL Exporter for Prometheus
                 {
                     "Name": "cntr_value",
                     "Label": "mssql_deadlocks",
-                    "Usage": "Gauge"
+                    "Usage": "Gauge",
+                    "DefaultValue": 0
                 }
             ]
         }
