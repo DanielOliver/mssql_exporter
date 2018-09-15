@@ -23,7 +23,7 @@ namespace mssql_exporter.core
                         .Select(x => new CounterGroupQuery.Column(x.Name, x.Order ?? 0, x.Label))
                         .FirstOrDefault();
 
-                    return new CounterGroupQuery(metricQuery.Name, metricQuery.Description ?? string.Empty, metricQuery.Query, labelColumns, valueColumn, metricFactory);
+                    return new CounterGroupQuery(metricQuery.Name, metricQuery.Description ?? string.Empty, metricQuery.Query, labelColumns, valueColumn, metricFactory, metricQuery.MillisecondTimeout);
 
                 case QueryUsage.Gauge:
                     var gaugeLabelColumns = 
@@ -37,13 +37,13 @@ namespace mssql_exporter.core
                         .Select(x => new GaugeGroupQuery.Column(x.Name, x.Order ?? 0, x.Label))
                         .FirstOrDefault();
 
-                    return new GaugeGroupQuery(metricQuery.Name, metricQuery.Description ?? string.Empty, metricQuery.Query, gaugeLabelColumns, gaugeValueColumn, metricFactory);
+                    return new GaugeGroupQuery(metricQuery.Name, metricQuery.Description ?? string.Empty, metricQuery.Query, gaugeLabelColumns, gaugeValueColumn, metricFactory, metricQuery.MillisecondTimeout);
 
                 case QueryUsage.Empty:
                     var gaugeColumns =
                         metricQuery.Columns
                         .Where(x => x.ColumnUsage == ColumnUsage.Gauge)
-                        .Select(x => new GenericQuery.GaugeColumn(x.Name, x.Label, x.Description ?? x.Label, metricFactory))
+                        .Select(x => new GenericQuery.GaugeColumn(x.Name, x.Label, x.Description ?? x.Label, metricFactory, x.DefaultValue))
                         .ToArray();
 
 
@@ -53,7 +53,7 @@ namespace mssql_exporter.core
                         .Select(x => new GenericQuery.CounterColumn(x.Name, x.Label, x.Description ?? x.Label, metricFactory))
                         .ToArray();
 
-                    return new GenericQuery(metricQuery.Name, metricQuery.Query, gaugeColumns, counterColumns);
+                    return new GenericQuery(metricQuery.Name, metricQuery.Query, gaugeColumns, counterColumns, metricQuery.MillisecondTimeout);
 
                 default:
                     break;

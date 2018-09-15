@@ -9,43 +9,51 @@ namespace mssql_exporter.core.queries
     class GaugeGroupQuery : IQuery
     {
 
-        private readonly IEnumerable<Column> labelColumns;
-        private readonly Prometheus.Gauge gauge;
-        private readonly string description;
-        private readonly Column valueColumn;
+        private readonly IEnumerable<Column> _labelColumns;
+        private readonly Prometheus.Gauge _gauge;
+        private readonly string _description;
+        private readonly Column _valueColumn;
 
-        public GaugeGroupQuery(string name, string description, string query, IEnumerable<Column> labelColumns, Column valueColumn, MetricFactory metricFactory)
+        public GaugeGroupQuery(string name, string description, string query, IEnumerable<Column> labelColumns, Column valueColumn, MetricFactory metricFactory, int? millisecondTimeout)
         {
             Name = name;
-            this.description = description;
+            this._description = description;
             Query = query;
-            this.valueColumn = valueColumn;
-            this.labelColumns = labelColumns.OrderBy(x => x.Order).ToArray();
-            gauge = metricFactory.CreateGauge(name, description, new Prometheus.GaugeConfiguration
+            MillisecondTimeout = millisecondTimeout;
+            this._valueColumn = valueColumn;
+            this._labelColumns = labelColumns.OrderBy(x => x.Order).ToArray();
+            _gauge = metricFactory.CreateGauge(name, description, new Prometheus.GaugeConfiguration
             {
-                LabelNames = this.labelColumns.Select(x => x.Label).ToArray(),
+                LabelNames = this._labelColumns.Select(x => x.Label).ToArray(),
                 SuppressInitialValue = true
             });
         }
 
         public string Name { get; }
         public string Query { get; }
+        public int? MillisecondTimeout { get; }
 
         public void Measure(DataSet dataSet)
         {
             var table = dataSet.Tables[0];
 
-            var columnIndices = labelColumns.Select(x => IQueryExtensions.GetColumnIndex(table, x.Name));
-            var valueIndex = IQueryExtensions.GetColumnIndex(table, valueColumn.Name);
+            var columnIndices = _labelColumns.Select(x => QueryExtensions.GetColumnIndex(table, x.Name));
+            var valueIndex = QueryExtensions.GetColumnIndex(table, _valueColumn.Name);
 
             foreach (var row in table.Rows.Cast<DataRow>())
             {
                 var labels = columnIndices.Select(x => row.ItemArray[x].ToString().Trim()).ToArray();
                 if (double.TryParse(row.ItemArray[valueIndex].ToString(), out double result))
                 {
-                    gauge.WithLabels(labels).Set(result);
+                    _gauge.WithLabels(labels).Set(result);
                 }
             }
+        }
+
+
+        public void Clear()
+        {
+            // TODO: What should I do here?
         }
 
         public class Column

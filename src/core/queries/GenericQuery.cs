@@ -1,25 +1,26 @@
 ﻿using Prometheus;
 using Prometheus.Advanced;
 using System;
-using System.Collections.Generic;
 using System.Data;
 
 namespace mssql_exporter.core.queries
 {
     public class GenericQuery: IQuery
     {
-        public GenericQuery(string name, string query, GaugeColumn[] gaugeColumns, CounterColumn[] counterColumns)
+        public GenericQuery(string name, string query, GaugeColumn[] gaugeColumns, CounterColumn[] counterColumns, int? millisecondTimeout)
         {
             Name = name;
             Query = query;
             GaugeColumns = gaugeColumns;
             CounterColumns = counterColumns;
+            MillisecondTimeout = millisecondTimeout;
         }
 
         public string Name { get; }
         public string Query { get; }
         public GaugeColumn[] GaugeColumns { get; }
         public CounterColumn[] CounterColumns { get; }
+        public int? MillisecondTimeout { get; }
 
         public void Measure(DataSet dataSet)
         {
@@ -33,9 +34,17 @@ namespace mssql_exporter.core.queries
             }
         }
 
+        public void Clear()
+        {
+            foreach (var column in GaugeColumns)
+            {
+                column.Clear();
+            }
+        }
+
         public class GaugeColumn
         {
-            public GaugeColumn(string name, string label, string description, MetricFactory metricFactory)
+            public GaugeColumn(string name, string label, string description, MetricFactory metricFactory, decimal? defaultValue = 0)
             {
                 if (string.IsNullOrWhiteSpace(name))
                 {
@@ -45,9 +54,11 @@ namespace mssql_exporter.core.queries
                 {
                     throw new ArgumentException("expected label argument", nameof(label));
                 }
+
+                _defaultValue = defaultValue;
                 Name = name;
                 Label = label;
-                gauge = metricFactory.CreateGauge(label, description, new Prometheus.GaugeConfiguration());
+                _gauge = metricFactory.CreateGauge(label, description, new Prometheus.GaugeConfiguration());
             }
 
             public void Measure(DataSet dataSet)
@@ -56,18 +67,25 @@ namespace mssql_exporter.core.queries
                 if (table.Rows.Count >= 0)
                 {
                     var row = table.Rows[0];
-                    var valueIndex = IQueryExtensions.GetColumnIndex(table, Name);
+                    var valueIndex = QueryExtensions.GetColumnIndex(table, Name);
                     if (double.TryParse(row.ItemArray[valueIndex].ToString(), out double result))
                     {
-                        gauge.Set(result);
+                        _gauge.Set(result);
                     }
                 }
+            }
+
+            public void Clear()
+            {
+                if(_defaultValue.HasValue)
+                    _gauge.Set(Convert.ToDouble(_defaultValue.Value));
             }
 
             public string Name { get; }
             public string Label { get; }
 
-            private readonly Gauge gauge;
+            private readonly Gauge _gauge;
+            private readonly decimal? _defaultValue;
         }
         public class CounterColumn
         {
@@ -83,7 +101,7 @@ namespace mssql_exporter.core.queries
                 }
                 Name = name;
                 Label = label;
-                counter = metricFactory.CreateCounter(label, description, new Prometheus.CounterConfiguration());
+                _counter = metricFactory.CreateCounter(label, description, new Prometheus.CounterConfiguration());
             }
 
             public void Measure(DataSet dataSet)
@@ -92,10 +110,10 @@ namespace mssql_exporter.core.queries
                 if(table.Rows.Count >= 0)
                 {
                     var row = table.Rows[0];
-                    var valueIndex = IQueryExtensions.GetColumnIndex(table, Name);
+                    var valueIndex = QueryExtensions.GetColumnIndex(table, Name);
                     if (double.TryParse(row.ItemArray[valueIndex].ToString(), out double result))
                     {
-                        counter.Set(result);
+                        _counter.Set(result);
                     }
                 }
             }
@@ -103,7 +121,7 @@ namespace mssql_exporter.core.queries
             public string Name { get; }
             public string Label { get; }
 
-            private readonly Counter counter;
+            private readonly Counter _counter;
         }
     }
 }

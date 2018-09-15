@@ -1,6 +1,4 @@
 ﻿using System.Data;
-using System.Data.SqlClient;
-using System.Threading.Tasks;
 
 namespace mssql_exporter.core
 {
@@ -14,6 +12,11 @@ namespace mssql_exporter.core
         void Measure(DataSet dataSet);
 
         /// <summary>
+        /// Called if a timeout or exception occurs.
+        /// </summary>
+        void Clear();
+
+        /// <summary>
         /// The name of this query.
         /// </summary>
         string Name { get; }
@@ -22,5 +25,10 @@ namespace mssql_exporter.core
         /// The query that returns results.
         /// </summary>
         string Query { get; }
+
+        /// <summary>
+        /// Query timeout in milliseconds.
+        /// </summary>
+        int? MillisecondTimeout { get; }
     }
 }

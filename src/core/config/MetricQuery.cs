@@ -10,6 +10,7 @@ namespace mssql_exporter.core.config
         public string Query { get; set; }
         public MetricQueryColumn[] Columns { get; set; }
         public string Usage { get; set; }
-        public QueryUsage QueryUsage => Constants.GetQueryUsage(this.Usage) ?? QueryUsage.Empty;        
+        public QueryUsage QueryUsage => Constants.GetQueryUsage(this.Usage) ?? QueryUsage.Empty;
+        public int? MillisecondTimeout { get; set; }
     }
 }

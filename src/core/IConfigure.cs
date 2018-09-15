@@ -9,11 +9,11 @@ namespace mssql_exporter.core
         /// <summary>
         /// Database Connection String
         /// </summary>
-        string DatabaseConnectionString { get; set; }
+        string DataSource { get; set; }
         /// <summary>
         /// Path to the file containing metric configuration.
         /// </summary>
-        string MetricsConfigurationFile { get; set; }
+        string ConfigFile { get; set; }
         /// <summary>
         /// Default: "/metrics"
         /// </summary>
@@ -24,5 +24,11 @@ namespace mssql_exporter.core
         /// </summary>
         /// <example>80</example>
         int ServerPort { get; set; }
+
+        /// <summary>
+        /// If true, adds default Prometheus Exporter metrics.
+        /// </summary>
+        /// <example>false</example>
+        bool AddExporterMetrics { get; set; }
     }
 }

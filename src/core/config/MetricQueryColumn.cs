@@ -8,5 +8,7 @@
         public string Label { get; set; }
         public int? Order { get; set; }
         public ColumnUsage ColumnUsage => Constants.GetColumnUsage(Usage) ?? ColumnUsage.Empty;
+        public decimal? DefaultValue { get; set; }
+
     }
 }
