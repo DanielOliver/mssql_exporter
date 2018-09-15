@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using mssql_exporter.core.queries;
+﻿using mssql_exporter.core.queries;
 using Prometheus.Advanced;
 
 namespace mssql_exporter.core.metrics

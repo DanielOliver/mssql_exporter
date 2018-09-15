@@ -1,7 +1,4 @@
-﻿using mssql_exporter.core.queries;
-using System.Linq;
-
-namespace mssql_exporter.core.config
+﻿namespace mssql_exporter.core.config
 {
     public class MetricQuery
     {

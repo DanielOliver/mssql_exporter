@@ -17,7 +17,7 @@ MSSQL Exporter for Prometheus
 {
     "Queries": [
         {
-            "Name": "Process_Status",
+            "Name": "mssql_process_status",
             "Query": "SELECT status, COUNT(*) count FROM sys.sysprocesses GROUP BY status",
             "Description": "Counts the number of processes per status",
             "Usage": "GaugesWithLabels",
@@ -34,8 +34,21 @@ MSSQL Exporter for Prometheus
                     "Usage": "Gauge"
                 }
             ]
+        },
+        {
+            "Name": "mssql_deadlocks",
+            "Query": "SELECT cntr_value FROM sys.dm_os_performance_counters where counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'",
+            "Description": "Number of lock requests per second that resulted in a deadlock since last restart",
+            "Columns": [
+                {
+                    "Name": "cntr_value",
+                    "Label": "mssql_deadlocks",
+                    "Usage": "Gauge"
+                }
+            ]
         }
-    ]
+    ],
+    "MillisecondTimeout": 4000
 }
 ```
 
@@ -55,12 +68,24 @@ or
 
 Content should look like 
 ```txt
-# HELP Process_Status Counts the number of processes per status
-# TYPE Process_Status GAUGE
-Process_Status{status="suspended"} 2
-Process_Status{status="background"} 85
-Process_Status{status="sleeping"} 37
-Process_Status{status="runnable"} 1
+# HELP mssql_up mssql_up
+# TYPE mssql_up GAUGE
+mssql_up 1
+# HELP mssql_exceptions Number of queries throwing exceptions.
+# TYPE mssql_exceptions GAUGE
+mssql_exceptions 0
+# HELP mssql_process_status Counts the number of processes per status
+# TYPE mssql_process_status GAUGE
+mssql_process_status{status="runnable"} 1
+mssql_process_status{status="suspended"} 1
+mssql_process_status{status="background"} 86
+mssql_process_status{status="sleeping"} 28
+# HELP mssql_timeouts Number of queries timing out.
+# TYPE mssql_timeouts GAUGE
+mssql_timeouts 0
+# HELP mssql_deadlocks mssql_deadlocks
+# TYPE mssql_deadlocks GAUGE
+mssql_deadlocks 0
 ```
 
 5. Add Prometheus scrape target (assuming same machine).
@@ -77,12 +102,23 @@ scrape_configs:
     - targets: ['localhost']
 ```
 
+## Command Line Options
 
-## Example Image
+```
+Commands
+   help
+   serve
+      -DataSource (Connection String)
+      -ConfigFile (metrics.json)
+      -ServerPath (/metrics)
+      -ServerPort (80)
+      -AddExporterMetrics (false)
 
-![Example](docs/example.png)
+Or environment variables:
+      PROMETHEUS_MSSQL_DataSource
+      PROMETHEUS_MSSQL_ConfigFile
+      PROMETHEUS_MSSQL_ServerPath
+      PROMETHEUS_MSSQL_ServerPort
+      PROMETHEUS_MSSQL_AddExporterMetrics
+```
 
-## TODO
-
-1. **DOCUMENT ALL METRIC CONFIGURATIONS.**
-2. **DOCUMENT ALL MSSQL_EXPORTER ENVIRONMENT CONFIGURATIONS.**

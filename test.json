@@ -1,7 +1,7 @@
 {
     "Queries": [
         {
-            "Name": "Process_Status",
+            "Name": "mssql_process_status",
             "Query": "SELECT status, COUNT(*) count FROM sys.sysprocesses GROUP BY status",
             "Description": "Counts the number of processes per status",
             "Usage": "GaugesWithLabels",
@@ -18,7 +18,19 @@
                     "Usage": "Gauge"
                 }
             ]
+        },
+        {
+            "Name": "mssql_deadlocks",
+            "Query": "SELECT cntr_value FROM sys.dm_os_performance_counters where counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'",
+            "Description": "Number of lock requests per second that resulted in a deadlock since last restart",
+            "Columns": [
+                {
+                    "Name": "cntr_value",
+                    "Label": "mssql_deadlocks",
+                    "Usage": "Gauge"
+                }
+            ]
         }
     ],
-    "MillisecondTimeout": 40
+    "MillisecondTimeout": 4000
 }

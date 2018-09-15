@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace mssql_exporter.core
+﻿namespace mssql_exporter.core
 {
     public interface IConfigure
     {

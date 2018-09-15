@@ -60,7 +60,6 @@ namespace mssql_exporter.server
                 .Build();
             IConfigure configurationBinding = new ConfigurationOptions();
             config.Bind(configurationBinding);
-            System.Console.WriteLine("Connection: " + configurationBinding.DataSource);
 
             var filePath = configurationBinding.ConfigFile;
             var fileText = System.IO.File.ReadAllText(filePath);
