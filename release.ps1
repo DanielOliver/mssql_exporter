@@ -12,19 +12,10 @@ dotnet publish src/server -c Release -r linux-x64 --self-contained -o "./bin/lin
 mkdir zip;
 $winx64zip = "mssql_exporter_win_x64.zip";
 $winx64zipPath = "zip/$winx64zip";
-$linuxx64zip = "mssql_exporter_linux_x64.tar.gz";
+$linuxx64zip = "mssql_exporter_linux_x64.zip";
 $linuxx64zipPath = "zip/$linuxx64zip";
 Compress-Archive -Path src/server/bin/win_x64/* -DestinationPath $winx64zipPath -Force;
-$origPath = Get-Location;
-try {
-    Set-Location "src/server/bin/linux_x64/";
-    $pathTar = "$(Join-Path -Path $origPath -ChildPath $linuxx64zipPath)";
-    $pathTar;
-    tar -zcvf $pathTar "*";
-}
-finally {    
-    Set-Location $origPath;
-}
+Compress-Archive -Path src/server/bin/linux_x64/* -DestinationPath $linuxx64zipPath -Force;
 
 if($hasTag -eq "true") {
     Write-Host "Finding release.";
