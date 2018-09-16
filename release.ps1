@@ -15,7 +15,16 @@ $winx64zipPath = "zip/$winx64zip";
 $linuxx64zip = "mssql_exporter_linux_x64.tar.gz";
 $linuxx64zipPath = "zip/$linuxx64zip";
 Compress-Archive -Path src/server/bin/win_x64/* -DestinationPath $winx64zipPath -Force;
-tar -C "src/server/bin/linux_x64/" -zcvf $linuxx64zipPath "./*";
+$origPath = Get-Location;
+try {
+    Set-Location "src/server/bin/linux_x64/";
+    $pathTar = "$(Join-Path -Path $origPath -ChildPath $linuxx64zipPath)";
+    $pathTar;
+    tar -zcvf $pathTar "*";
+}
+finally {    
+    Set-Location $origPath;
+}
 
 if($hasTag -eq "true") {
     Write-Host "Finding release.";
