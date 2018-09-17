@@ -3,3 +3,8 @@ image: Visual Studio 2015
 build_script:
 - cmd: PowerShell -Version 5.1 .\release.ps1
 test: off
+artifacts:
+  - path: zip/mssql_exporter_linux_x64.tar
+    name: linux_x64
+  - path: zip/mssql_exporter_win_x64.zip
+    name: win_x64
