@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using mssql_exporter.core;
 using Prometheus;
 using Prometheus.Advanced;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace mssql_exporter.server
 {
+
     public class Program
     {
         public static void Main(string[] args)
@@ -33,7 +34,7 @@ namespace mssql_exporter.server
             System.Console.WriteLine("      -ServerPath (/metrics)");
             System.Console.WriteLine("      -ServerPort (80)");
             System.Console.WriteLine("      -AddExporterMetrics (false)");
-            System.Console.WriteLine("");
+            System.Console.WriteLine(string.Empty);
             System.Console.WriteLine("Or environment variables:");
             System.Console.WriteLine("      PROMETHEUS_MSSQL_DataSource");
             System.Console.WriteLine("      PROMETHEUS_MSSQL_ConfigFile");
@@ -71,7 +72,7 @@ namespace mssql_exporter.server
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args, IConfigure configurationBinding)
         {
-            var defaultPath = "/" + configurationBinding.ServerPath.Replace("/", "");
+            var defaultPath = "/" + configurationBinding.ServerPath.Replace("/", string.Empty);
             if (defaultPath.Equals("/")) defaultPath = string.Empty;
 
             return WebHost.CreateDefaultBuilder(args)

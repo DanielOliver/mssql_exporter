@@ -1,12 +1,12 @@
-﻿using mssql_exporter.core;
-using Prometheus.Advanced;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using mssql_exporter.core;
 using mssql_exporter.core.config;
 using mssql_exporter.core.metrics;
 using Prometheus;
+using Prometheus.Advanced;
 
 namespace mssql_exporter.server
 {
@@ -30,7 +30,7 @@ namespace mssql_exporter.server
         public void RegisterMetrics(ICollectorRegistry registry)
         {
             _metricFactory = Prometheus.Metrics.WithCustomRegistry(registry);
-            _metrics = 
+            _metrics =
                 _configureAction(_metricFactory)
                     .Append(new ConnectionUp(_metricFactory))
                     .ToArray();

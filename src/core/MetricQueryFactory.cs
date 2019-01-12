@@ -1,7 +1,7 @@
-﻿using mssql_exporter.core.config;
-using mssql_exporter.core.queries;
-using System;
+﻿using System;
 using System.Linq;
+using mssql_exporter.core.config;
+using mssql_exporter.core.queries;
 
 namespace mssql_exporter.core
 {
@@ -12,12 +12,12 @@ namespace mssql_exporter.core
             switch (metricQuery.QueryUsage)
             {
                 case QueryUsage.Counter:
-                    var labelColumns = 
+                    var labelColumns =
                         metricQuery.Columns
                         .Where(x => x.ColumnUsage == ColumnUsage.CounterLabel)
                         .Select(x => new CounterGroupQuery.Column(x.Name, x.Order ?? 0, x.Label));
 
-                    var valueColumn = 
+                    var valueColumn =
                         metricQuery.Columns
                         .Where(x => x.ColumnUsage == ColumnUsage.Counter)
                         .Select(x => new CounterGroupQuery.Column(x.Name, x.Order ?? 0, x.Label))
@@ -26,12 +26,12 @@ namespace mssql_exporter.core
                     return new CounterGroupQuery(metricQuery.Name, metricQuery.Description ?? string.Empty, metricQuery.Query, labelColumns, valueColumn, metricFactory, metricQuery.MillisecondTimeout);
 
                 case QueryUsage.Gauge:
-                    var gaugeLabelColumns = 
+                    var gaugeLabelColumns =
                         metricQuery.Columns
                         .Where(x => x.ColumnUsage == ColumnUsage.GaugeLabel)
                         .Select(x => new GaugeGroupQuery.Column(x.Name, x.Order ?? 0, x.Label));
 
-                    var gaugeValueColumn = 
+                    var gaugeValueColumn =
                         metricQuery.Columns
                         .Where(x => x.ColumnUsage == ColumnUsage.Gauge)
                         .Select(x => new GaugeGroupQuery.Column(x.Name, x.Order ?? 0, x.Label))

@@ -1,8 +1,8 @@
-﻿using Prometheus.Advanced;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Prometheus.Advanced;
 
 namespace mssql_exporter.core.queries
 {

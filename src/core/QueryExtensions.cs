@@ -1,9 +1,9 @@
-﻿using mssql_exporter.core.config;
-using System;
+﻿using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
+using mssql_exporter.core.config;
 
 namespace mssql_exporter.core
 {

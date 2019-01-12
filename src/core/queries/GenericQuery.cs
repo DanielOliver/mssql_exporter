@@ -1,7 +1,7 @@
-﻿using Prometheus;
-using Prometheus.Advanced;
-using System;
+﻿using System;
 using System.Data;
+using Prometheus;
+using Prometheus.Advanced;
 
 namespace mssql_exporter.core.queries
 {

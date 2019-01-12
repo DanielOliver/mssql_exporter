@@ -8,7 +8,6 @@ namespace mssql_exporter.core
         /// Given a database connection, gets metrics.
         /// </summary>
         /// <param name="connection"></param>
-        /// <returns></returns>
         void Measure(DataSet dataSet);
 
         /// <summary>
