@@ -5,7 +5,8 @@ using Prometheus.Advanced;
 
 namespace mssql_exporter.core.queries
 {
-    public class GenericQuery: IQuery
+#pragma warning disable CA1034 // Nested types should not be visible
+    public class GenericQuery : IQuery
     {
         public GenericQuery(string name, string query, GaugeColumn[] gaugeColumns, CounterColumn[] counterColumns, int? millisecondTimeout)
         {
@@ -17,9 +18,13 @@ namespace mssql_exporter.core.queries
         }
 
         public string Name { get; }
+
         public string Query { get; }
+
         public GaugeColumn[] GaugeColumns { get; }
+
         public CounterColumn[] CounterColumns { get; }
+
         public int? MillisecondTimeout { get; }
 
         public void Measure(DataSet dataSet)
@@ -28,6 +33,7 @@ namespace mssql_exporter.core.queries
             {
                 column.Measure(dataSet);
             }
+
             foreach (var column in CounterColumns)
             {
                 column.Measure(dataSet);
@@ -44,12 +50,16 @@ namespace mssql_exporter.core.queries
 
         public class GaugeColumn
         {
+            private readonly Gauge _gauge;
+            private readonly decimal? _defaultValue;
+
             public GaugeColumn(string name, string label, string description, MetricFactory metricFactory, decimal? defaultValue = 0)
             {
                 if (string.IsNullOrWhiteSpace(name))
                 {
                     throw new ArgumentException("Expected name argument", nameof(name));
                 }
+
                 if (string.IsNullOrWhiteSpace(label))
                 {
                     throw new ArgumentException("expected label argument", nameof(label));
@@ -60,6 +70,10 @@ namespace mssql_exporter.core.queries
                 Label = label;
                 _gauge = metricFactory.CreateGauge(label, description, new Prometheus.GaugeConfiguration());
             }
+
+            public string Name { get; }
+
+            public string Label { get; }
 
             public void Measure(DataSet dataSet)
             {
@@ -77,37 +91,42 @@ namespace mssql_exporter.core.queries
 
             public void Clear()
             {
-                if(_defaultValue.HasValue)
+                if (_defaultValue.HasValue)
+                {
                     _gauge.Set(Convert.ToDouble(_defaultValue.Value));
+                }
             }
-
-            public string Name { get; }
-            public string Label { get; }
-
-            private readonly Gauge _gauge;
-            private readonly decimal? _defaultValue;
         }
+
         public class CounterColumn
         {
+            private readonly Counter _counter;
+
             public CounterColumn(string name, string label, string description, MetricFactory metricFactory)
             {
                 if (string.IsNullOrWhiteSpace(name))
                 {
                     throw new ArgumentException("Expected name argument", nameof(name));
                 }
+
                 if (string.IsNullOrWhiteSpace(label))
                 {
                     throw new ArgumentException("expected label argument", nameof(label));
                 }
+
                 Name = name;
                 Label = label;
                 _counter = metricFactory.CreateCounter(label, description, new Prometheus.CounterConfiguration());
             }
 
+            public string Name { get; }
+
+            public string Label { get; }
+
             public void Measure(DataSet dataSet)
             {
                 var table = dataSet.Tables[0];
-                if(table.Rows.Count >= 0)
+                if (table.Rows.Count >= 0)
                 {
                     var row = table.Rows[0];
                     var valueIndex = QueryExtensions.GetColumnIndex(table, Name);
@@ -117,11 +136,7 @@ namespace mssql_exporter.core.queries
                     }
                 }
             }
-
-            public string Name { get; }
-            public string Label { get; }
-
-            private readonly Counter _counter;
         }
     }
+#pragma warning restore CA1034 // Nested types should not be visible
 }

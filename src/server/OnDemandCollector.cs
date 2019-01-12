@@ -12,20 +12,20 @@ namespace mssql_exporter.server
 {
     public class OnDemandCollector : IOnDemandCollector
     {
+        private readonly string _sqlConnectionString;
+        private readonly int _millisecondTimeout;
+        private readonly Func<MetricFactory, IEnumerable<IQuery>> _configureAction;
+        private Gauge _exceptionsGauge;
+        private Gauge _timeoutGauge;
+        private MetricFactory _metricFactory;
+        private IQuery[] _metrics;
+
         public OnDemandCollector(string sqlConnectionString, int millisecondTimeout, Func<MetricFactory, IEnumerable<IQuery>> configureAction)
         {
             this._sqlConnectionString = sqlConnectionString;
             this._millisecondTimeout = millisecondTimeout;
             this._configureAction = configureAction;
         }
-
-        private MetricFactory _metricFactory;
-        private IQuery[] _metrics;
-        private readonly string _sqlConnectionString;
-        private readonly int _millisecondTimeout;
-        private readonly Func<MetricFactory, IEnumerable<IQuery>> _configureAction;
-        private Gauge _exceptionsGauge;
-        private Gauge _timeoutGauge;
 
         public void RegisterMetrics(ICollectorRegistry registry)
         {

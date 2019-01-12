@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
@@ -9,8 +10,7 @@ using Prometheus.Advanced;
 
 namespace mssql_exporter.server
 {
-
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -72,8 +72,11 @@ namespace mssql_exporter.server
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args, IConfigure configurationBinding)
         {
-            var defaultPath = "/" + configurationBinding.ServerPath.Replace("/", string.Empty);
-            if (defaultPath.Equals("/")) defaultPath = string.Empty;
+            var defaultPath = "/" + configurationBinding.ServerPath.Replace("/", string.Empty, StringComparison.CurrentCultureIgnoreCase);
+            if (defaultPath.Equals("/", StringComparison.CurrentCultureIgnoreCase))
+            {
+                defaultPath = string.Empty;
+            }
 
             return WebHost.CreateDefaultBuilder(args)
                 .Configure(app => app.UseMetricServer(defaultPath))
@@ -92,7 +95,9 @@ namespace mssql_exporter.server
                 DefaultCollectorRegistry.Instance.Clear();
             }
 
-            var collector = new OnDemandCollector(configure.DataSource, metricFile.MillisecondTimeout,
+            var collector = new OnDemandCollector(
+                configure.DataSource,
+                metricFile.MillisecondTimeout,
                 x => ConfigureMetrics(metricFile, x));
             DefaultCollectorRegistry.Instance.RegisterOnDemandCollectors(collector);
         }

@@ -6,6 +6,7 @@ using Prometheus.Advanced;
 
 namespace mssql_exporter.core.queries
 {
+#pragma warning disable CA1034 // Nested types should not be visible
     public class CounterGroupQuery : IQuery
     {
         private readonly IEnumerable<Column> _labelColumns;
@@ -21,20 +22,25 @@ namespace mssql_exporter.core.queries
             this._valueColumn = valueColumn;
             MillisecondTimeout = millisecondTimeout;
             this._labelColumns = labelColumns.OrderBy(x => x.Order).ToArray();
-            _counter = metricFactory.CreateCounter(name, description, new Prometheus.CounterConfiguration
+
+            var counterConfiguration = new Prometheus.CounterConfiguration
             {
                 LabelNames = this._labelColumns.Select(x => x.Label).ToArray()
-            });
+            };
+
+            _counter = metricFactory.CreateCounter(name, description, counterConfiguration);
         }
+
+        public string Name { get; }
+
+        public string Query { get; }
+
+        public int? MillisecondTimeout { get; }
 
         public void Clear()
         {
             // TODO: What should I do here?
         }
-
-        public string Name { get; }
-        public string Query { get; }
-        public int? MillisecondTimeout { get; }
 
         public void Measure(DataSet dataSet)
         {
@@ -46,7 +52,7 @@ namespace mssql_exporter.core.queries
             foreach (var row in table.Rows.Cast<DataRow>())
             {
                 var labels = columnIndices.Select(x => row.ItemArray[x].ToString().Trim()).ToArray();
-                if(double.TryParse(row.ItemArray[valueIndex].ToString(), out double result))
+                if (double.TryParse(row.ItemArray[valueIndex].ToString(), out double result))
                 {
                     _counter.WithLabels(labels).Set(result);
                 }
@@ -73,8 +79,11 @@ namespace mssql_exporter.core.queries
             }
 
             public string Name { get; }
+
             public int Order { get; }
+
             public string Label { get; }
         }
     }
+#pragma warning restore CA1034
 }

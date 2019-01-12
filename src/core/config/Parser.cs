@@ -2,7 +2,7 @@
 
 namespace mssql_exporter.core.config
 {
-    public class Parser
+    public static class Parser
     {
         public static MetricFile FromJson(string text)
         {

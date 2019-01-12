@@ -6,15 +6,18 @@
         /// Database Connection String
         /// </summary>
         string DataSource { get; set; }
+
         /// <summary>
         /// Path to the file containing metric configuration.
         /// </summary>
         string ConfigFile { get; set; }
+
         /// <summary>
         /// Default: "/metrics"
         /// </summary>
         /// <example>metrics</example>
         string ServerPath { get; set; }
+
         /// <summary>
         /// Default: "80"
         /// </summary>

@@ -5,7 +5,7 @@ using mssql_exporter.core.queries;
 
 namespace mssql_exporter.core
 {
-    public class MetricQueryFactory
+    public static class MetricQueryFactory
     {
         public static IQuery GetSpecificQuery(Prometheus.Advanced.MetricFactory metricFactory, MetricQuery metricQuery)
         {
@@ -46,7 +46,6 @@ namespace mssql_exporter.core
                         .Select(x => new GenericQuery.GaugeColumn(x.Name, x.Label, x.Description ?? x.Label, metricFactory, x.DefaultValue))
                         .ToArray();
 
-
                     var counterColumns =
                         metricQuery.Columns
                         .Where(x => x.ColumnUsage == ColumnUsage.Counter)
@@ -58,6 +57,7 @@ namespace mssql_exporter.core
                 default:
                     break;
             }
+
             throw new Exception("Undefined QueryUsage.");
         }
     }

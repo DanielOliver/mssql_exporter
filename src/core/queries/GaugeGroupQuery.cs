@@ -6,9 +6,9 @@ using Prometheus.Advanced;
 
 namespace mssql_exporter.core.queries
 {
-    class GaugeGroupQuery : IQuery
+#pragma warning disable CA1034 // Nested types should not be visible
+    public class GaugeGroupQuery : IQuery
     {
-
         private readonly IEnumerable<Column> _labelColumns;
         private readonly Prometheus.Gauge _gauge;
         private readonly string _description;
@@ -22,15 +22,20 @@ namespace mssql_exporter.core.queries
             MillisecondTimeout = millisecondTimeout;
             this._valueColumn = valueColumn;
             this._labelColumns = labelColumns.OrderBy(x => x.Order).ToArray();
-            _gauge = metricFactory.CreateGauge(name, description, new Prometheus.GaugeConfiguration
+
+            var gaugeConfiguration = new Prometheus.GaugeConfiguration
             {
                 LabelNames = this._labelColumns.Select(x => x.Label).ToArray(),
                 SuppressInitialValue = true
-            });
+            };
+
+            _gauge = metricFactory.CreateGauge(name, description, gaugeConfiguration);
         }
 
         public string Name { get; }
+
         public string Query { get; }
+
         public int? MillisecondTimeout { get; }
 
         public void Measure(DataSet dataSet)
@@ -49,7 +54,6 @@ namespace mssql_exporter.core.queries
                 }
             }
         }
-
 
         public void Clear()
         {
@@ -76,8 +80,11 @@ namespace mssql_exporter.core.queries
             }
 
             public string Name { get; }
+
             public int Order { get; }
+
             public string Label { get; }
         }
     }
+#pragma warning restore CA1034
 }

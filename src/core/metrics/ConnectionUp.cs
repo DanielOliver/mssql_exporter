@@ -3,10 +3,12 @@ using Prometheus.Advanced;
 
 namespace mssql_exporter.core.metrics
 {
-    public class ConnectionUp: GenericQuery
+    public class ConnectionUp : GenericQuery
     {
         public ConnectionUp(MetricFactory metricFactory)
-            : base("mssql_up", "SELECT 1 mssql_up", new[] { new GaugeColumn("mssql_up", "mssql_up", "mssql_up", metricFactory, 0) }, new CounterColumn[] {}, null)
+#pragma warning disable CA1825 // Avoid zero-length array allocations.
+            : base("mssql_up", "SELECT 1 mssql_up", new[] { new GaugeColumn("mssql_up", "mssql_up", "mssql_up", metricFactory, 0) }, new CounterColumn[] { }, null)
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         {
         }
     }

@@ -14,7 +14,8 @@ namespace mssql_exporter.core
             var timeout = Math.Min(defaultMillisecondTimeout, query.MillisecondTimeout ?? 100_000_000);
             var tokenSource = new CancellationTokenSource(timeout).Token;
 
-            var measureTask = Task.Run(() =>
+            var measureTask = Task.Run(
+                () =>
             {
                 try
                 {
@@ -65,11 +66,15 @@ namespace mssql_exporter.core
 
             var delayTask = Task.Run(async () =>
             {
+#pragma warning disable CA2007 // Do not directly await a Task
                 await Task.Delay(timeout);
+#pragma warning restore CA2007 // Do not directly await a Task
                 return MeasureResult.Timeout;
             });
 
+#pragma warning disable CA2007 // Do not directly await a Task
             return await await Task.WhenAny(delayTask, measureTask);
+#pragma warning restore CA2007 // Do not directly await a Task
         }
 
         public static int GetColumnIndex(DataTable dataTable, string columnName)
@@ -81,6 +86,7 @@ namespace mssql_exporter.core
                     return i;
                 }
             }
+
             throw new ArgumentOutOfRangeException(nameof(columnName), $"Expected to find column {columnName}");
         }
     }
