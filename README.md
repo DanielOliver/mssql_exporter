@@ -89,6 +89,12 @@ mssql_timeouts 0
 mssql_deadlocks 0
 ```
 
+_Note_
+
+* *mssql_up* gauge is "1" if the database is reachable. "0" if connection to the database fails.
+* *mssql_exceptions* gauge is "0" if all queries run successfully. Else, this is the number of queries that throw exceptions.
+* *mssql_timeouts* is "0" if all queries are running with the configured timeout. Else, this is the number of queries that are not completing within the configured timeout.
+
 5. Add Prometheus scrape target (assuming same machine).
 
 ```yml
