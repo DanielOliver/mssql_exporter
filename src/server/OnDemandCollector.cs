@@ -6,32 +6,28 @@ using mssql_exporter.core;
 using mssql_exporter.core.config;
 using mssql_exporter.core.metrics;
 using Prometheus;
-using Prometheus.Advanced;
 
 namespace mssql_exporter.server
 {
-    public class OnDemandCollector : IOnDemandCollector
+    public class OnDemandCollector
     {
         private readonly string _sqlConnectionString;
         private readonly int _millisecondTimeout;
-        private readonly Func<MetricFactory, IEnumerable<IQuery>> _configureAction;
-        private Gauge _exceptionsGauge;
-        private Gauge _timeoutGauge;
-        private MetricFactory _metricFactory;
-        private IQuery[] _metrics;
+        private readonly CollectorRegistry _registry;
+        private readonly Gauge _exceptionsGauge;
+        private readonly Gauge _timeoutGauge;
+        private readonly MetricFactory _metricFactory;
+        private readonly IQuery[] _metrics;
 
-        public OnDemandCollector(string sqlConnectionString, int millisecondTimeout, Func<MetricFactory, IEnumerable<IQuery>> configureAction)
+        public OnDemandCollector(string sqlConnectionString, int millisecondTimeout, CollectorRegistry registry, Func<MetricFactory, IEnumerable<IQuery>> configureAction)
         {
-            this._sqlConnectionString = sqlConnectionString;
-            this._millisecondTimeout = millisecondTimeout;
-            this._configureAction = configureAction;
-        }
-
-        public void RegisterMetrics(ICollectorRegistry registry)
-        {
-            _metricFactory = Prometheus.Metrics.WithCustomRegistry(registry);
+            _sqlConnectionString = sqlConnectionString;
+            _millisecondTimeout = millisecondTimeout;
+            _registry = registry;
+            _metricFactory = Metrics.WithCustomRegistry(registry);
+            _registry.AddBeforeCollectCallback(UpdateMetrics);
             _metrics =
-                _configureAction(_metricFactory)
+                configureAction(_metricFactory)
                     .Append(new ConnectionUp(_metricFactory))
                     .ToArray();
 

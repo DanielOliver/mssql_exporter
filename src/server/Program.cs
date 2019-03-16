@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using mssql_exporter.core;
 using Prometheus;
-using Prometheus.Advanced;
 
 namespace mssql_exporter.server
 {
@@ -65,12 +64,14 @@ namespace mssql_exporter.server
             var filePath = configurationBinding.ConfigFile;
             var fileText = System.IO.File.ReadAllText(filePath);
             var metricFile = core.config.Parser.FromJson(fileText);
-            ConfigurePrometheus(configurationBinding, metricFile);
 
-            CreateWebHostBuilder(args, configurationBinding).Build().Run();
+            var registry = new CollectorRegistry();
+            var collector = ConfigurePrometheus(configurationBinding, metricFile, registry);
+
+            CreateWebHostBuilder(args, configurationBinding, registry).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args, IConfigure configurationBinding)
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args, IConfigure configurationBinding, CollectorRegistry registry)
         {
             var defaultPath = "/" + configurationBinding.ServerPath.Replace("/", string.Empty, StringComparison.CurrentCultureIgnoreCase);
             if (defaultPath.Equals("/", StringComparison.CurrentCultureIgnoreCase))
@@ -79,7 +80,7 @@ namespace mssql_exporter.server
             }
 
             return WebHost.CreateDefaultBuilder(args)
-                .Configure(app => app.UseMetricServer(defaultPath))
+                .Configure(app => app.UseMetricServer(defaultPath, registry))
                 .UseUrls($"http://*:{configurationBinding.ServerPort}");
         }
 
@@ -88,18 +89,14 @@ namespace mssql_exporter.server
             return metricFile.Queries.Select(x => MetricQueryFactory.GetSpecificQuery(metricFactory, x));
         }
 
-        public static void ConfigurePrometheus(IConfigure configure, core.config.MetricFile metricFile)
+        public static OnDemandCollector ConfigurePrometheus(IConfigure configure, core.config.MetricFile metricFile, CollectorRegistry registry)
         {
-            if (configure.AddExporterMetrics == false)
-            {
-                DefaultCollectorRegistry.Instance.Clear();
-            }
-
-            var collector = new OnDemandCollector(
+            return new OnDemandCollector(
                 configure.DataSource,
                 metricFile.MillisecondTimeout,
-                x => ConfigureMetrics(metricFile, x));
-            DefaultCollectorRegistry.Instance.RegisterOnDemandCollectors(collector);
+                registry,
+                metricFactory => ConfigureMetrics(metricFile, metricFactory)
+                );
         }
     }
 }

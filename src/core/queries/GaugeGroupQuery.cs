@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Prometheus.Advanced;
+using Prometheus;
 
 namespace mssql_exporter.core.queries
 {

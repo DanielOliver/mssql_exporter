@@ -1,5 +1,5 @@
 ﻿using mssql_exporter.core.queries;
-using Prometheus.Advanced;
+using Prometheus;
 
 namespace mssql_exporter.core.metrics
 {

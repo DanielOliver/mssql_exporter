@@ -7,7 +7,7 @@ namespace mssql_exporter.core
 {
     public static class MetricQueryFactory
     {
-        public static IQuery GetSpecificQuery(Prometheus.Advanced.MetricFactory metricFactory, MetricQuery metricQuery)
+        public static IQuery GetSpecificQuery(Prometheus.MetricFactory metricFactory, MetricQuery metricQuery)
         {
             switch (metricQuery.QueryUsage)
             {
