@@ -70,22 +70,22 @@ or
 Content should look like 
 ```txt
 # HELP mssql_up mssql_up
-# TYPE mssql_up GAUGE
+# TYPE mssql_up gauge
 mssql_up 1
 # HELP mssql_exceptions Number of queries throwing exceptions.
-# TYPE mssql_exceptions GAUGE
+# TYPE mssql_exceptions gauge
 mssql_exceptions 0
 # HELP mssql_process_status Counts the number of processes per status
-# TYPE mssql_process_status GAUGE
+# TYPE mssql_process_status gauge
 mssql_process_status{status="runnable"} 1
 mssql_process_status{status="suspended"} 1
 mssql_process_status{status="background"} 86
 mssql_process_status{status="sleeping"} 28
 # HELP mssql_timeouts Number of queries timing out.
-# TYPE mssql_timeouts GAUGE
+# TYPE mssql_timeouts gauge
 mssql_timeouts 0
 # HELP mssql_deadlocks mssql_deadlocks
-# TYPE mssql_deadlocks GAUGE
+# TYPE mssql_deadlocks gauge
 mssql_deadlocks 0
 ```
 
