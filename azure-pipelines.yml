@@ -52,7 +52,7 @@ steps:
   displayName: 'Attach Linux x64 artifacts to GitHub Release'   
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
   inputs:
-    gitHubConnection: DanielOliver
+    gitHubConnection: github.com_DanielOliver
     repositoryName: DanielOliver/mssql_exporter           
     assets: $(Build.ArtifactStagingDirectory)/linux_x64
     action: edit
@@ -63,7 +63,7 @@ steps:
   displayName: 'Attach Win x64 artifacts to GitHub Release'   
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
   inputs:
-    gitHubConnection: DanielOliver
+    gitHubConnection: github.com_DanielOliver
     repositoryName: DanielOliver/mssql_exporter           
     assets: $(Build.ArtifactStagingDirectory)/win_x64
     action: edit
