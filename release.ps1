@@ -8,8 +8,8 @@ Remove-Item src/server/bin -Force -Recurse -ErrorAction SilentlyContinue;
 Remove-Item zip -Force -Recurse -ErrorAction SilentlyContinue;
 mkdir zip;
 
-dotnet publish src/server -c Release -r win-x64 --self-contained -o "./bin/win_x64";
-dotnet publish src/server -c Release -r linux-x64 --self-contained -o "./bin/linux_x64";
+dotnet publish src/server -c Release -r win-x64 -o "./bin/win_x64" --self-contained true /p:PublishTrimmed=true
+dotnet publish src/server -c Release -r win-x64 -o "./bin/linux_x64" --self-contained true /p:PublishTrimmed=true
 
 
 function Create-Tar($tarFile, $dest) {

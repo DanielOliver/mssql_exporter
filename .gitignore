@@ -212,6 +212,7 @@ _pkginfo.txt
 
 # Others
 ClientBin/
+bin
 ~$*
 *~
 *.dbmdl
@@ -331,3 +332,4 @@ ASALocalRun/
 
 zip
 7Zip4Powershell
+out
