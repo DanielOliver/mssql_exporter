@@ -2,13 +2,15 @@
 using System.Linq;
 using mssql_exporter.core.config;
 using mssql_exporter.core.queries;
+using Serilog;
 
 namespace mssql_exporter.core
 {
     public static class MetricQueryFactory
     {
-        public static IQuery GetSpecificQuery(Prometheus.MetricFactory metricFactory, MetricQuery metricQuery)
+        public static IQuery GetSpecificQuery(Prometheus.MetricFactory metricFactory, MetricQuery metricQuery, ILogger logger)
         {
+            logger.Information("Creating metric {Name}", metricQuery.Name);
             switch (metricQuery.QueryUsage)
             {
                 case QueryUsage.Counter:
@@ -23,7 +25,7 @@ namespace mssql_exporter.core
                         .Select(x => new CounterGroupQuery.Column(x.Name, x.Order ?? 0, x.Label))
                         .FirstOrDefault();
 
-                    return new CounterGroupQuery(metricQuery.Name, metricQuery.Description ?? string.Empty, metricQuery.Query, labelColumns, valueColumn, metricFactory, metricQuery.MillisecondTimeout);
+                    return new CounterGroupQuery(metricQuery.Name, metricQuery.Description ?? string.Empty, metricQuery.Query, labelColumns, valueColumn, metricFactory, logger, metricQuery.MillisecondTimeout);
 
                 case QueryUsage.Gauge:
                     var gaugeLabelColumns =
@@ -37,7 +39,7 @@ namespace mssql_exporter.core
                         .Select(x => new GaugeGroupQuery.Column(x.Name, x.Order ?? 0, x.Label))
                         .FirstOrDefault();
 
-                    return new GaugeGroupQuery(metricQuery.Name, metricQuery.Description ?? string.Empty, metricQuery.Query, gaugeLabelColumns, gaugeValueColumn, metricFactory, metricQuery.MillisecondTimeout);
+                    return new GaugeGroupQuery(metricQuery.Name, metricQuery.Description ?? string.Empty, metricQuery.Query, gaugeLabelColumns, gaugeValueColumn, metricFactory, logger, metricQuery.MillisecondTimeout);
 
                 case QueryUsage.Empty:
                     var gaugeColumns =
@@ -52,9 +54,10 @@ namespace mssql_exporter.core
                         .Select(x => new GenericQuery.CounterColumn(x.Name, x.Label, x.Description ?? x.Label, metricFactory))
                         .ToArray();
 
-                    return new GenericQuery(metricQuery.Name, metricQuery.Query, gaugeColumns, counterColumns, metricQuery.MillisecondTimeout);
+                    return new GenericQuery(metricQuery.Name, metricQuery.Query, gaugeColumns, counterColumns, logger, metricQuery.MillisecondTimeout);
 
                 default:
+                    logger.Error("Failed to create query {Name}", metricQuery.Name);
                     break;
             }
 

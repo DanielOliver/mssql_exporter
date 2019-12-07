@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Prometheus;
+using Serilog;
 
 namespace mssql_exporter.core.queries
 {
@@ -13,14 +14,16 @@ namespace mssql_exporter.core.queries
         private readonly Prometheus.Gauge _gauge;
         private readonly string _description;
         private readonly Column _valueColumn;
+        private readonly ILogger _logger;
 
-        public GaugeGroupQuery(string name, string description, string query, IEnumerable<Column> labelColumns, Column valueColumn, MetricFactory metricFactory, int? millisecondTimeout)
+        public GaugeGroupQuery(string name, string description, string query, IEnumerable<Column> labelColumns, Column valueColumn, MetricFactory metricFactory, ILogger logger, int? millisecondTimeout)
         {
             Name = name;
             this._description = description;
             Query = query;
             MillisecondTimeout = millisecondTimeout;
             this._valueColumn = valueColumn;
+            _logger = logger;
             this._labelColumns = labelColumns.OrderBy(x => x.Order).ToArray();
 
             var gaugeConfiguration = new Prometheus.GaugeConfiguration

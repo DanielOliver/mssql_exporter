@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Prometheus;
+using Serilog;
 
 namespace mssql_exporter.core.queries
 {
@@ -10,16 +11,18 @@ namespace mssql_exporter.core.queries
     public class CounterGroupQuery : IQuery
     {
         private readonly IEnumerable<Column> _labelColumns;
-        private readonly Prometheus.Counter _counter;
+        private readonly Counter _counter;
         private readonly string _description;
         private readonly Column _valueColumn;
+        private readonly ILogger _logger;
 
-        public CounterGroupQuery(string name, string description, string query, IEnumerable<Column> labelColumns, Column valueColumn, MetricFactory metricFactory, int? millisecondTimeout)
+        public CounterGroupQuery(string name, string description, string query, IEnumerable<Column> labelColumns, Column valueColumn, MetricFactory metricFactory, ILogger logger, int? millisecondTimeout)
         {
             Name = name;
             this._description = description;
             Query = query;
             this._valueColumn = valueColumn;
+            _logger = logger;
             MillisecondTimeout = millisecondTimeout;
             this._labelColumns = labelColumns.OrderBy(x => x.Order).ToArray();
 

@@ -13,5 +13,7 @@ namespace mssql_exporter.server
         public int ServerPort { get; set; } = 80;
 
         public bool AddExporterMetrics { get; set; } = false;
+
+        public string LogLevel { get; set; }
     }
 }

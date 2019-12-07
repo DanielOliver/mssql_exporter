@@ -4,12 +4,13 @@ using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 using mssql_exporter.core.config;
+using Serilog;
 
 namespace mssql_exporter.core
 {
     public static class QueryExtensions
     {
-        public static async Task<MeasureResult> MeasureWithConnection(this IQuery query, string sqlConnectionString, int defaultMillisecondTimeout)
+        public static async Task<MeasureResult> MeasureWithConnection(this IQuery query, ILogger logger, string sqlConnectionString, int defaultMillisecondTimeout)
         {
             var timeout = Math.Min(defaultMillisecondTimeout, query.MillisecondTimeout ?? 100_000_000);
             var tokenSource = new CancellationTokenSource(timeout).Token;
@@ -44,22 +45,16 @@ namespace mssql_exporter.core
                         }
                     }
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException error)
                 {
+                    logger.Error(error, "Query {Name} timed out", query.Name);
                     query.Clear();
                     return MeasureResult.Timeout;
                 }
-                catch (Exception)
+                catch (Exception error)
                 {
-                    try
-                    {
-                        query.Clear();
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
-
+                    query.Clear();
+                    logger.Error(error, "Query {Name} failed", query.Name);
                     return MeasureResult.Exception;
                 }
             }, tokenSource);
@@ -81,7 +76,7 @@ namespace mssql_exporter.core
         {
             for (int i = 0; i < dataTable.Columns.Count; i++)
             {
-                if (dataTable.Columns[i].ColumnName.Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                if (dataTable.Columns[i].ColumnName.Equals(columnName, StringComparison.CurrentCulture))
                 {
                     return i;
                 }

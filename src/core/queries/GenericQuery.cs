@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Data;
 using Prometheus;
+using Serilog;
 
 namespace mssql_exporter.core.queries
 {
 #pragma warning disable CA1034 // Nested types should not be visible
     public class GenericQuery : IQuery
     {
-        public GenericQuery(string name, string query, GaugeColumn[] gaugeColumns, CounterColumn[] counterColumns, int? millisecondTimeout)
+        private readonly ILogger _logger;
+
+        public GenericQuery(string name, string query, GaugeColumn[] gaugeColumns, CounterColumn[] counterColumns, ILogger logger, int? millisecondTimeout)
         {
+            _logger = logger;
             Name = name;
             Query = query;
             GaugeColumns = gaugeColumns;

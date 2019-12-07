@@ -120,6 +120,7 @@ Commands
       -ServerPath (/metrics)
       -ServerPort (80)
       -AddExporterMetrics (false)
+      -LogLevel (Error)
 
 Or environment variables:
       PROMETHEUS_MSSQL_DataSource
@@ -127,5 +128,19 @@ Or environment variables:
       PROMETHEUS_MSSQL_ServerPath
       PROMETHEUS_MSSQL_ServerPort
       PROMETHEUS_MSSQL_AddExporterMetrics
+      PROMETHEUS_MSSQL_LogLevel
 ```
 
+## Debug Run and Docker
+
+1. Run Docker
+
+```powershell
+docker run -e 'ACCEPT_EULA=Y' -e "SA_PASSWORD=yourStrong(!)Password" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest
+```
+
+2. Run exporter from "src/server" directory.
+
+```powershell
+dotnet run -- serve -ConfigFile "../../test.json" -DataSource "Server=tcp:localhost,1433;Initial Catalog=master;Persist Security Info=False;User ID=sa;Password=yourStrong(!)Password;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=30;" -LogLevel Debug
+```

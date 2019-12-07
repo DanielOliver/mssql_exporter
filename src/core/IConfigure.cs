@@ -29,5 +29,11 @@
         /// </summary>
         /// <example>false</example>
         bool AddExporterMetrics { get; set; }
+
+        /// <summary>
+        /// The default level to log at.
+        /// </summary>
+        /// <example>Error</example>
+        string LogLevel { get; set; }
     }
 }
