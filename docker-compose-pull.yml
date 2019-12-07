@@ -1,0 +1,42 @@
+version: '3'
+services:
+  mssql_exporter:
+    image: "danieloliver/mssql_exporter:latest"
+    ports:
+      - "80:80"
+    depends_on: 
+      - sqlserver.dev
+    environment:
+      - PROMETHEUS_MSSQL_DataSource=Server=tcp:sqlserver.dev,1433;Initial Catalog=master;Persist Security Info=False;User ID=sa;Password=yourStrong(!)Password;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=10;
+      - PROMETHEUS_MSSQL_ConfigFile=metrics.json
+      - PROMETHEUS_MSSQL_ServerPath=metrics
+      - PROMETHEUS_MSSQL_ServerPort=80
+      - PROMETHEUS_MSSQL_LogLevel=Information
+      - PROMETHEUS_MSSQL_AddExporterMetrics=false
+      - |
+        PROMETHEUS_MSSQL_ConfigText=
+        {
+            "Queries": [
+                {
+                    "Name": "mssql_deadlocks",
+                    "Query": "SELECT cntr_value FROM sys.dm_os_performance_counters where counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'",
+                    "Description": "Number of lock requests per second that resulted in a deadlock since last restart",
+                    "Columns": [
+                        {
+                            "Name": "cntr_value",
+                            "Label": "mssql_deadlocks",
+                            "Usage": "Gauge",
+                            "DefaultValue": 0
+                        }
+                    ]
+                }
+            ],
+            "MillisecondTimeout": 4000
+        }
+  sqlserver.dev:
+    image: "mcr.microsoft.com/mssql/server:2017-latest"
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=yourStrong(!)Password
