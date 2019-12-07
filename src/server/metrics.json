@@ -33,5 +33,5 @@
             ]
         }
     ],
-    "MillisecondTimeout": 1000
+    "MillisecondTimeout": 4000
 }

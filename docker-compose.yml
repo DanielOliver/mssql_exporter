@@ -1,0 +1,21 @@
+version: '3'
+services:
+  mssql_exporter:
+    build: .
+    ports:
+      - "80:80"
+    depends_on: 
+      - sqlserver.dev
+    environment:
+      - PROMETHEUS_MSSQL_DataSource=Server=tcp:sqlserver.dev,1433;Initial Catalog=master;Persist Security Info=False;User ID=sa;Password=yourStrong(!)Password;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=10;
+      - PROMETHEUS_MSSQL_ConfigFile=metrics.json
+      - PROMETHEUS_MSSQL_ServerPath=metrics
+      - PROMETHEUS_MSSQL_ServerPort=80
+      - PROMETHEUS_MSSQL_LogLevel=Error
+  sqlserver.dev:
+    image: "mcr.microsoft.com/mssql/server:2017-latest"
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=yourStrong(!)Password

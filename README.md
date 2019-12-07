@@ -11,7 +11,7 @@ MSSQL Exporter for Prometheus
 
 1. Download system of your choice from [latest release](https://github.com/DanielOliver/mssql_exporter/releases/latest).
 
-2. Create a file "test.json" and  put this in it:
+2. Create a file "metrics.json" and  put this in it:
 
 ```json
 {
@@ -56,13 +56,13 @@ MSSQL Exporter for Prometheus
 3. Run mssql_exporter
 
 ```bash
-./mssql_exporter serve -ConfigFile "test.json" -DataSource "Server=tcp:{ YOUR DATABASE HERE },1433;Initial Catalog={ YOUR INITIAL CATALOG HERE };Persist Security Info=False;User ID={ USER ID HERE };Password={ PASSWORD HERE };MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+./mssql_exporter serve -ConfigFile "metrics.json" -DataSource "Server=tcp:{ YOUR DATABASE HERE },1433;Initial Catalog={ YOUR INITIAL CATALOG HERE };Persist Security Info=False;User ID={ USER ID HERE };Password={ PASSWORD HERE };MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 ```
 
 or
 
 ```powershell
-.\mssql_exporter.exe serve -ConfigFile "test.json" -DataSource "Server=tcp:{ YOUR DATABASE HERE },1433;Initial Catalog={ YOUR INITIAL CATALOG HERE };Persist Security Info=False;User ID={ USER ID HERE };Password={ PASSWORD HERE };MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+.\mssql_exporter.exe serve -ConfigFile "metrics.json" -DataSource "Server=tcp:{ YOUR DATABASE HERE },1433;Initial Catalog={ YOUR INITIAL CATALOG HERE };Persist Security Info=False;User ID={ USER ID HERE };Password={ PASSWORD HERE };MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 ```
 
 4. Open http://localhost/metrics
@@ -136,11 +136,19 @@ Or environment variables:
 1. Run Docker
 
 ```powershell
-docker run -e 'ACCEPT_EULA=Y' -e "SA_PASSWORD=yourStrong(!)Password" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest
+docker run -e 'ACCEPT_EULA=Y' -e "SA_PASSWORD=yourStrong(!)Password" --net=host -p 1433:1433 -d --rm --name sqlserverdev mcr.microsoft.com/mssql/server:2017-latest
 ```
 
 2. Run exporter from "src/server" directory.
 
 ```powershell
-dotnet run -- serve -ConfigFile "../../test.json" -DataSource "Server=tcp:localhost,1433;Initial Catalog=master;Persist Security Info=False;User ID=sa;Password=yourStrong(!)Password;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=30;" -LogLevel Debug
+dotnet run -- serve -ConfigFile "../../metrics.json" -DataSource "Server=tcp:localhost,1433;Initial Catalog=master;Persist Security Info=False;User ID=sa;Password=yourStrong(!)Password;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=10;" -LogLevel Debug
+```
+
+OR
+
+3. Docker-compose!
+
+```powershell
+docker-compose up
 ```
