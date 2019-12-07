@@ -48,6 +48,12 @@ steps:
     artifactName: 'linux_x64'
   displayName: Publish Linux x64 artifacts
 
+- script: |
+    export githubTag=git describe --exact-match $(Build.SourceVersion)
+    echo $githubTag
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+  displayName: Set tag to env variable githubTag
+
 - task: GithubRelease@0 
   displayName: 'Attach Linux x64 artifacts to GitHub Release'   
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
@@ -57,6 +63,7 @@ steps:
     assets: $(Build.ArtifactStagingDirectory)/linux_x64
     action: edit
     target: '$(Build.SourceVersion)'
+    tag: '$(githubTag)'
     addChangeLog: true
 
 - task: GithubRelease@0 
@@ -68,4 +75,5 @@ steps:
     assets: $(Build.ArtifactStagingDirectory)/win_x64
     action: edit
     target: '$(Build.SourceVersion)'
+    tag: '$(githubTag)'
     addChangeLog: true
