@@ -5,7 +5,7 @@ MSSQL Exporter for Prometheus
 
 | Appveyor | GitHub |
 |---:|:---|
-| [![Build status](https://ci.appveyor.com/api/projects/status/7ci7j5mg05p21w3j/branch/master?svg=true)](https://ci.appveyor.com/project/DanielOliver/mssql-exporter/branch/master) | [![GitHub release](https://img.shields.io/github/release/DanielOliver/mssql_exporter.svg)](https://github.com/DanielOliver/mssql_exporter/releases/latest) |
+| [![Build Status](https://dev.azure.com/mssqlexporter/mssql_exporter/_apis/build/status/DanielOliver.mssql_exporter?branchName=master)](https://dev.azure.com/mssqlexporter/mssql_exporter/_build/latest?definitionId=1&branchName=master) | [![GitHub release](https://img.shields.io/github/release/DanielOliver/mssql_exporter.svg)](https://github.com/DanielOliver/mssql_exporter/releases/latest) |
 
 ## Quickstart docker-compose
 
