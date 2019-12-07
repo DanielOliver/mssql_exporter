@@ -5,6 +5,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using mssql_exporter.core;
+using mssql_exporter.core.config;
 using Prometheus;
 using Serilog;
 using Serilog.Core;
@@ -39,6 +40,7 @@ namespace mssql_exporter.server
             Console.WriteLine("      -ServerPath (/metrics)");
             Console.WriteLine("      -ServerPort (80)");
             Console.WriteLine("      -AddExporterMetrics (false)");
+            Console.WriteLine("      -ConfigText ()");
             Console.WriteLine(string.Empty);
             Console.WriteLine("Or environment variables:");
             Console.WriteLine("      PROMETHEUS_MSSQL_DataSource");
@@ -46,18 +48,20 @@ namespace mssql_exporter.server
             Console.WriteLine("      PROMETHEUS_MSSQL_ServerPath");
             Console.WriteLine("      PROMETHEUS_MSSQL_ServerPort");
             Console.WriteLine("      PROMETHEUS_MSSQL_AddExporterMetrics");
+            Console.WriteLine("      PROMETHEUS_MSSQL_ConfigText");
         }
 
         public static void RunWebServer(string[] args)
         {
             var switchMappings = new Dictionary<string, string>
             {
-                { "-DataSource", "DataSource" },
-                { "-ConfigFile", "ConfigFile" },
-                { "-ServerPath", "ServerPath" },
-                { "-ServerPort", "ServerPort" },
-                { "-AddExporterMetrics", "AddExporterMetrics" },
-                { "-LogLevel", "LogLevel" }
+                {"-DataSource", "DataSource"},
+                {"-ConfigFile", "ConfigFile"},
+                {"-ServerPath", "ServerPath"},
+                {"-ServerPort", "ServerPort"},
+                {"-AddExporterMetrics", "AddExporterMetrics"},
+                {"-LogLevel", "LogLevel"},
+                {"-ConfigText", "ConfigText"}
             };
 
             var config = new ConfigurationBuilder()
@@ -82,19 +86,58 @@ namespace mssql_exporter.server
                 .WriteTo.Console()
                 .CreateLogger();
 
-            var filePath = configurationBinding.ConfigFile;
-            var fileText = System.IO.File.ReadAllText(filePath);
-            var metricFile = core.config.Parser.FromJson(fileText);
+            Log.Logger.Information("ServerPath {ServerPath}; ServerPort {ServerPort}; AddExporterMetrics {AddExporterMetrics}; LogLevel {LogLevel}", configurationBinding.ServerPath, configurationBinding.ServerPort, configurationBinding.AddExporterMetrics, configurationBinding.LogLevel);
+            if (string.IsNullOrWhiteSpace(configurationBinding.DataSource))
+            {
+                Log.Logger.Error("Expected DataSource: SQL Server connectionString");
+                return;
+            }
 
-            var registry = new CollectorRegistry();
+            MetricFile metricFile;
+            if (string.IsNullOrWhiteSpace(configurationBinding.ConfigText))
+            {
+                var filePath = configurationBinding.ConfigFile;
+                try
+                {
+                    var fileText = System.IO.File.ReadAllText(filePath);
+                    Log.Logger.Information("Reading ConfigText {ConfigText} from {FileName}", fileText, filePath);
+                    metricFile = Parser.FromJson(fileText);
+                }
+                catch (Exception e)
+                {
+                    Log.Logger.Error(e, "Failed to read and parse text from {FileName}", filePath);
+                    throw;
+                }
+            }
+            else
+            {
+                try
+                {
+                    Log.Logger.Information("Parsing ConfigText {ConfigText}", configurationBinding.ConfigText);
+                    metricFile = Parser.FromJson(configurationBinding.ConfigText);
+                }
+                catch (Exception e)
+                {
+                    Log.Logger.Error(e, "Failed to parse text from ConfigText");
+                    throw;
+                }
+            }
+
+            var registry = (configurationBinding.AddExporterMetrics)
+                ? Metrics.DefaultRegistry
+                : new CollectorRegistry();
+
             var collector = ConfigurePrometheus(configurationBinding, Log.Logger, metricFile, registry);
 
             CreateWebHostBuilder(args, configurationBinding, registry).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args, IConfigure configurationBinding, CollectorRegistry registry)
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args, IConfigure configurationBinding,
+            CollectorRegistry registry)
         {
-            var defaultPath = "/" + configurationBinding.ServerPath.Replace("/", string.Empty, StringComparison.CurrentCultureIgnoreCase);
+            var defaultPath =
+                "/" + configurationBinding.ServerPath.Replace("/", string.Empty,
+                    StringComparison.CurrentCultureIgnoreCase);
             if (defaultPath.Equals("/", StringComparison.CurrentCultureIgnoreCase))
             {
                 defaultPath = string.Empty;
@@ -106,12 +149,14 @@ namespace mssql_exporter.server
                 .UseUrls($"http://*:{configurationBinding.ServerPort}");
         }
 
-        public static IEnumerable<IQuery> ConfigureMetrics(core.config.MetricFile metricFile, MetricFactory metricFactory, ILogger logger)
+        public static IEnumerable<IQuery> ConfigureMetrics(core.config.MetricFile metricFile,
+            MetricFactory metricFactory, ILogger logger)
         {
             return metricFile.Queries.Select(x => MetricQueryFactory.GetSpecificQuery(metricFactory, x, logger));
         }
 
-        public static OnDemandCollector ConfigurePrometheus(IConfigure configure, ILogger logger, core.config.MetricFile metricFile, CollectorRegistry registry)
+        public static OnDemandCollector ConfigurePrometheus(IConfigure configure, ILogger logger,
+            core.config.MetricFile metricFile, CollectorRegistry registry)
         {
             return new OnDemandCollector(
                 configure.DataSource,

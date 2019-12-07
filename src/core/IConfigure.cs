@@ -11,6 +11,11 @@
         /// Path to the file containing metric configuration.
         /// </summary>
         string ConfigFile { get; set; }
+        
+        /// <summary>
+        /// The text containing metric configuration.
+        /// </summary>
+        string ConfigText { get; set; }
 
         /// <summary>
         /// Default: "/metrics"

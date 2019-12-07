@@ -7,6 +7,8 @@ namespace mssql_exporter.server
         public string DataSource { get; set; }
 
         public string ConfigFile { get; set; } = "metrics.json";
+        
+        public string ConfigText { get; set; }
 
         public string ServerPath { get; set; } = "metrics";
 
