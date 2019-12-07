@@ -13,6 +13,13 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- task: UseDotNet@2
+  displayName: 'Use .NET Core sdk 3.1'
+  inputs:
+    packageType: sdk
+    version: 3.1
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
 - script: |
     dotnet build ./src/server/ --configuration $(buildConfiguration)
     dotnet publish ./src/server/ --configuration $(buildConfiguration) --output $BUILD_ARTIFACTSTAGINGDIRECTORY/win_x64 --self-contained true -r win-x64
