@@ -5,10 +5,8 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>mssql_exporter</AssemblyName>
     <RootNamespace>mssql_exporter.server</RootNamespace>
-    <RuntimeIdentifiers>win-x86;win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <LangVersion>8</LangVersion>    
-    <PublishTrimmed>true</PublishTrimmed>
-    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
   
   <ItemGroup>
