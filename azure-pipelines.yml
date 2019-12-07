@@ -49,10 +49,11 @@ steps:
   displayName: Publish Linux x64 artifacts
 
 - script: |
-    export githubTag=git describe --exact-match $(Build.SourceVersion)
+    export githubTag=(git describe --abbrev=0 --tags)
     echo $githubTag
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
   displayName: Set tag to env variable githubTag
+  failOnStderr: true
 
 - task: GithubRelease@0 
   displayName: 'Attach Linux x64 artifacts to GitHub Release'   
