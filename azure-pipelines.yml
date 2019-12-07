@@ -7,28 +7,24 @@ trigger:
 - master
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'Ubuntu 18.04'
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 steps:
-- task: NuGetToolInstaller@1
+- script: |
+    dotnet build ./src/server/ --configuration $(buildConfiguration)
+    dotnet publish ./src/server/ --configuration $(buildConfiguration) --output $BUILD_ARTIFACTSTAGINGDIRECTORY/win_x64 --self-contained true -r win-x64
+    dotnet publish ./src/server/ --configuration $(buildConfiguration) --output $BUILD_ARTIFACTSTAGINGDIRECTORY/linux_x64 --self-contained true -linux-x64
+  failOnStderr: true
 
-- task: NuGetCommand@2
+- task: PublishBuildArtifacts@1
   inputs:
-    restoreSolution: '$(solution)'
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)/win_x64'
+    artifactName: 'win_x64'
 
-- task: VSBuild@1
+- task: PublishBuildArtifacts@1
   inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
-- task: VSTest@2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)/linux_x64'
+    artifactName: 'linux_x64'
