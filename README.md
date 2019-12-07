@@ -19,7 +19,7 @@ docker-compose.yml
 version: '3'
 services:
   mssql_exporter:
-    build: .
+    image: "danieloliver/mssql_exporter:latest"
     ports:
       - "80:80"
     depends_on: 
