@@ -40,5 +40,13 @@
         /// </summary>
         /// <example>Error</example>
         string LogLevel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the log file path.
+        /// </summary>
+        /// <value>
+        /// The log file path.
+        /// </value>
+        public string LogFilePath { get; set; }
     }
 }

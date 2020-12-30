@@ -17,5 +17,7 @@ namespace mssql_exporter.server
         public bool AddExporterMetrics { get; set; } = false;
 
         public string LogLevel { get; set; }
+
+        public string LogFilePath { get; set; } = "mssqlexporter-log.txt";
     }
 }
