@@ -6,7 +6,8 @@
     <AssemblyName>mssql_exporter</AssemblyName>
     <RootNamespace>mssql_exporter.server</RootNamespace>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
-    <LangVersion>8</LangVersion>    
+    <LangVersion>8</LangVersion>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>    
   </PropertyGroup>
   
   <ItemGroup>
@@ -22,6 +23,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\core\core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\docker-compose.yml">
+      <Link>docker-compose.yml</Link>
+    </Content>
+    <Content Include="..\..\Dockerfile">
+      <Link>Dockerfile</Link>
+    </Content>
   </ItemGroup>
 
 </Project>
