@@ -175,6 +175,7 @@ Commands
       -AddExporterMetrics (false)
       -LogLevel (Error)
       -ConfigText ()
+      -LogFilePath (mssqlexporter-log.txt)
 
 Or environment variables:
       PROMETHEUS_MSSQL_DataSource
@@ -184,6 +185,7 @@ Or environment variables:
       PROMETHEUS_MSSQL_AddExporterMetrics
       PROMETHEUS_MSSQL_LogLevel
       PROMETHEUS_MSSQL_ConfigText
+      PROMETHEUS_MSSQL_LogFilePath
 ```
 
 * DataSource
@@ -212,6 +214,16 @@ Or environment variables:
 * ConfigText
     * Default: empty
     * Optionally fill in this with the contents of the ConfigFile to ignore and not read from the ConfigFile.
+* LogFilePath
+    * Default: "mssqlexporter-log.txt"
+    * The path to the log file. Can be relative or absolute.
+
+## Run as windows service
+
+You can install the exporter as windows service with the following command
+```bash
+sc create mssql_exporter binpath="%full_path_to_mssql_exporter.exe%"
+```
 
 ## Debug Run and Docker
 
