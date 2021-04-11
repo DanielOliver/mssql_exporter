@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using mssql_exporter.core;
 using mssql_exporter.core.config;
 using Prometheus;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
 
 namespace mssql_exporter.server
@@ -17,9 +18,9 @@ namespace mssql_exporter.server
     {
         public static void Main(string[] args)
         {
-            if (args.Length >= 1 && args[0].Equals("serve", StringComparison.CurrentCulture))
+            if ((args.Length >= 1 && args[0].Equals("serve", StringComparison.CurrentCulture)) || WindowsServiceHelpers.IsWindowsService())
             {
-                RunWebServer(args.Skip(1).ToArray());
+                RunWebServer(args.Where(a => !string.Equals("serve", a, StringComparison.InvariantCultureIgnoreCase)).ToArray());
             }
             else
             {
@@ -41,6 +42,8 @@ namespace mssql_exporter.server
             Console.WriteLine("      -ServerPort (80)");
             Console.WriteLine("      -AddExporterMetrics (false)");
             Console.WriteLine("      -ConfigText ()");
+            Console.WriteLine("      -LogLevel (Warning)");
+            Console.WriteLine("      -LogFilePath (mssqlexporter-log.txt)");
             Console.WriteLine(string.Empty);
             Console.WriteLine("Or environment variables:");
             Console.WriteLine("      PROMETHEUS_MSSQL_DataSource");
@@ -49,6 +52,8 @@ namespace mssql_exporter.server
             Console.WriteLine("      PROMETHEUS_MSSQL_ServerPort");
             Console.WriteLine("      PROMETHEUS_MSSQL_AddExporterMetrics");
             Console.WriteLine("      PROMETHEUS_MSSQL_ConfigText");
+            Console.WriteLine("      PROMETHEUS_MSSQL_LogLevel");
+            Console.WriteLine("      PROMETHEUS_MSSQL_LogFilePath");
         }
 
         public static void RunWebServer(string[] args)
@@ -84,6 +89,7 @@ namespace mssql_exporter.server
                 .MinimumLevel.Is(loggingLevel)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
+                .WriteTo.File(TryGetAbsolutePath(configurationBinding.LogFilePath))
                 .CreateLogger();
 
             Log.Logger.Information("ServerPath {ServerPath}; ServerPort {ServerPort}; AddExporterMetrics {AddExporterMetrics}; LogLevel {LogLevel}", configurationBinding.ServerPath, configurationBinding.ServerPort, configurationBinding.AddExporterMetrics, configurationBinding.LogLevel);
@@ -96,7 +102,7 @@ namespace mssql_exporter.server
             MetricFile metricFile;
             if (string.IsNullOrWhiteSpace(configurationBinding.ConfigText))
             {
-                var filePath = configurationBinding.ConfigFile;
+                var filePath = TryGetAbsolutePath(configurationBinding.ConfigFile);
                 try
                 {
                     var fileText = System.IO.File.ReadAllText(filePath);
@@ -129,10 +135,10 @@ namespace mssql_exporter.server
 
             var collector = ConfigurePrometheus(configurationBinding, Log.Logger, metricFile, registry);
 
-            CreateWebHostBuilder(args, configurationBinding, registry).Build().Run();
+            CreateHostBuilder(args, configurationBinding, registry).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args, IConfigure configurationBinding,
+        public static IHostBuilder CreateHostBuilder(string[] args, IConfigure configurationBinding,
             CollectorRegistry registry)
         {
             var defaultPath =
@@ -143,10 +149,12 @@ namespace mssql_exporter.server
                 defaultPath = string.Empty;
             }
 
-            return WebHost.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .Configure(app => app.UseMetricServer(defaultPath, registry))
-                .UseUrls($"http://*:{configurationBinding.ServerPort}");
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(builder => builder
+                    .Configure(applicationBuilder => applicationBuilder.UseMetricServer(defaultPath, registry))
+                    .UseUrls($"http://*:{configurationBinding.ServerPort}"))
+                .UseWindowsService()
+                .UseSerilog();
         }
 
         public static IEnumerable<IQuery> ConfigureMetrics(core.config.MetricFile metricFile,
@@ -164,6 +172,21 @@ namespace mssql_exporter.server
                 logger,
                 registry,
                 metricFactory => ConfigureMetrics(metricFile, metricFactory, logger));
+        }
+
+        private static string TryGetAbsolutePath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+
+            if (Path.IsPathFullyQualified(path))
+            {
+                return path;
+            }
+
+            return Path.Combine(AppContext.BaseDirectory, path);
         }
     }
 }
