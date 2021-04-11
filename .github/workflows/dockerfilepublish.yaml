@@ -13,6 +13,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: danieloliver/mssql-exporter:latest,danieloliver/mssql-exporter:${GITHUB_REF:10}
+          tags: "danieloliver/mssql-exporter:latest,danieloliver/mssql-exporter:${GITHUB_REF:10}"
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
