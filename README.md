@@ -5,7 +5,7 @@ MSSQL Exporter for Prometheus
 
 | Azure Devops | GitHub | Docker Hub |
 |---:|:---:|:---|
-| [![Build Status](https://dev.azure.com/mssqlexporter/mssql_exporter/_apis/build/status/DanielOliver.mssql_exporter?branchName=master)](https://dev.azure.com/mssqlexporter/mssql_exporter/_build/latest?definitionId=1&branchName=master) | [![GitHub release](https://img.shields.io/github/release/DanielOliver/mssql_exporter.svg)](https://github.com/DanielOliver/mssql_exporter/releases/latest) | [![Docker Hub](https://img.shields.io/docker/cloud/build/danieloliver/mssql_exporter)](https://hub.docker.com/r/danieloliver/mssql_exporter)
+| [![Publish Docker image](https://github.com/DanielOliver/mssql_exporter/actions/workflows/dockerfilepublish.yaml/badge.svg)](https://github.com/DanielOliver/mssql_exporter/actions/workflows/dockerfilepublish.yaml) | [![GitHub release](https://img.shields.io/github/release/DanielOliver/mssql_exporter.svg)](https://github.com/DanielOliver/mssql_exporter/releases/latest) | [![Docker Hub](https://img.shields.io/docker/cloud/build/danieloliver/mssql_exporter)](https://hub.docker.com/r/danieloliver/mssql_exporter)
 
 ## Quickstart docker-compose
 
@@ -19,18 +19,18 @@ docker-compose.yml
 version: '3'
 services:
   mssql_exporter:
-    image: "danieloliver/mssql_exporter:latest"
+    build: "danieloliver/mssql_exporter:latest"
     ports:
       - "80:80"
-    depends_on: 
+    depends_on:
       - sqlserver.dev
     environment:
       - PROMETHEUS_MSSQL_DataSource=Server=tcp:sqlserver.dev,1433;Initial Catalog=master;Persist Security Info=False;User ID=sa;Password=yourStrong(!)Password;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=10;
       - PROMETHEUS_MSSQL_ConfigFile=metrics.json
       - PROMETHEUS_MSSQL_ServerPath=metrics
       - PROMETHEUS_MSSQL_ServerPort=80
-      - PROMETHEUS_MSSQL_LogLevel=Information
       - PROMETHEUS_MSSQL_AddExporterMetrics=false
+      - PROMETHEUS_MSSQL_Serilog__MinimumLevel=Information
       - |
         PROMETHEUS_MSSQL_ConfigText=
         {
@@ -173,9 +173,7 @@ Commands
       -ServerPath (/metrics)
       -ServerPort (80)
       -AddExporterMetrics (false)
-      -LogLevel (Error)
       -ConfigText ()
-      -LogFilePath (mssqlexporter-log.txt)
 
 Or environment variables:
       PROMETHEUS_MSSQL_DataSource
@@ -183,9 +181,8 @@ Or environment variables:
       PROMETHEUS_MSSQL_ServerPath
       PROMETHEUS_MSSQL_ServerPort
       PROMETHEUS_MSSQL_AddExporterMetrics
-      PROMETHEUS_MSSQL_LogLevel
       PROMETHEUS_MSSQL_ConfigText
-      PROMETHEUS_MSSQL_LogFilePath
+      PROMETHEUS_MSSQL_Serilog__MinimumLevel
 ```
 
 * DataSource
@@ -204,19 +201,9 @@ Or environment variables:
     * Options:
         * true
         * false
-* LogLevel
-    * Default: Error
-    * Options:
-        * Information
-        * Error
-        * Debug
-        * Warning
 * ConfigText
     * Default: empty
     * Optionally fill in this with the contents of the ConfigFile to ignore and not read from the ConfigFile.
-* LogFilePath
-    * Default: "mssqlexporter-log.txt"
-    * The path to the log file. Can be relative or absolute.
 
 ## Run as windows service
 
@@ -224,6 +211,12 @@ You can install the exporter as windows service with the following command
 ```bash
 sc create mssql_exporter binpath="%full_path_to_mssql_exporter.exe%"
 ```
+
+## Changing logging configuration
+
+Logging is configured using [Serilog Settings Configuration](https://github.com/serilog/serilog-settings-configuration)
+
+Editing "config.json" allows for changing aspects of logging. Console is default, and "Serilog.Sinks.File" is also installed. Further sinks would have to be installed into the project file's dependencies.
 
 ## Debug Run and Docker
 
@@ -236,11 +229,11 @@ docker run -e 'ACCEPT_EULA=Y' -e "SA_PASSWORD=yourStrong(!)Password" --net=host 
 2. Run exporter from "src/server" directory.
 
 ```powershell
-dotnet run -- serve -ConfigFile "../../metrics.json" -DataSource "Server=tcp:localhost,1433;Initial Catalog=master;Persist Security Info=False;User ID=sa;Password=yourStrong(!)Password;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=8;" -LogLevel Debug
+dotnet run -- serve -ConfigFile "../../metrics.json" -DataSource "Server=tcp:localhost,1433;Initial Catalog=master;Persist Security Info=False;User ID=sa;Password=yourStrong(!)Password;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=8;"
 ```
 
 ```bash
-dotnet run -- serve -ConfigFile "../../metrics.json" -DataSource 'Server=tcp:localhost,1433;Initial Catalog=master;Persist Security Info=False;User ID=sa;Password=yourStrong(!)Password;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=8;' -LogLevel Debug
+dotnet run -- serve -ConfigFile "../../metrics.json" -DataSource 'Server=tcp:localhost,1433;Initial Catalog=master;Persist Security Info=False;User ID=sa;Password=yourStrong(!)Password;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=True;Connection Timeout=8;'
 ```
 
 OR

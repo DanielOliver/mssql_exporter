@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
@@ -15,11 +15,10 @@ COPY src/core/. ./core/
 COPY src/server/. ./server/
 COPY metrics.json ./
 WORKDIR /app/server
-RUN dotnet publish -c Release -r linux-musl-x64 -o out --self-contained true /p:PublishTrimmed=true
+RUN dotnet publish -c Release -r linux-x64 -o out -p:PublishSingleFile=true --self-contained true -p:PublishTrimmed=true
 
-FROM mcr.microsoft.com/dotnet/core/runtime-deps:3.1-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
 EXPOSE 80
 WORKDIR /app
-RUN apk add --no-cache icu-libs
 COPY --from=build /app/server/out ./
 ENTRYPOINT ["./mssql_exporter", "serve"]

@@ -11,8 +11,8 @@ services:
       - PROMETHEUS_MSSQL_ConfigFile=metrics.json
       - PROMETHEUS_MSSQL_ServerPath=metrics
       - PROMETHEUS_MSSQL_ServerPort=80
-      - PROMETHEUS_MSSQL_LogLevel=Information
       - PROMETHEUS_MSSQL_AddExporterMetrics=false
+      - PROMETHEUS_MSSQL_Serilog__MinimumLevel=Information
       - |
         PROMETHEUS_MSSQL_ConfigText=
         {
