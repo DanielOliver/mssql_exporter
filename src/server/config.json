@@ -1,0 +1,13 @@
+{
+  "Serilog": {
+    "Using":  [ "Serilog.Sinks.Console" ],
+    "MinimumLevel": "Information",
+    "WriteTo": [
+      { "Name": "Console" }
+    ],
+    "Enrich": [ "FromLogContext" ],
+    "Properties": {
+      "Application": "MssqlExporter"
+    }
+  }
+}

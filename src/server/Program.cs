@@ -10,7 +10,6 @@ using mssql_exporter.core;
 using mssql_exporter.core.config;
 using Prometheus;
 using Serilog;
-using Serilog.Events;
 
 namespace mssql_exporter.server
 {
@@ -29,7 +28,7 @@ namespace mssql_exporter.server
         }
 
         /// <summary>
-        /// dotnet run -- serve -ConfigFile "../../test.json" -DataSource "Server=tcp:{ YOUR DATABASE HERE },1433;Initial Catalog={ YOUR INITIAL CATALOG HERE };Persist Security Info=False;User ID={ USER ID HERE };Password={ PASSWORD HERE };MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" -LogLevel Debug
+        /// dotnet run -- serve -ConfigFile "../../test.json" -DataSource "Server=tcp:{ YOUR DATABASE HERE },1433;Initial Catalog={ YOUR INITIAL CATALOG HERE };Persist Security Info=False;User ID={ USER ID HERE };Password={ PASSWORD HERE };MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
         /// </summary>
         public static void Help()
         {
@@ -42,8 +41,6 @@ namespace mssql_exporter.server
             Console.WriteLine("      -ServerPort (80)");
             Console.WriteLine("      -AddExporterMetrics (false)");
             Console.WriteLine("      -ConfigText ()");
-            Console.WriteLine("      -LogLevel (Warning)");
-            Console.WriteLine("      -LogFilePath (mssqlexporter-log.txt)");
             Console.WriteLine(string.Empty);
             Console.WriteLine("Or environment variables:");
             Console.WriteLine("      PROMETHEUS_MSSQL_DataSource");
@@ -52,8 +49,7 @@ namespace mssql_exporter.server
             Console.WriteLine("      PROMETHEUS_MSSQL_ServerPort");
             Console.WriteLine("      PROMETHEUS_MSSQL_AddExporterMetrics");
             Console.WriteLine("      PROMETHEUS_MSSQL_ConfigText");
-            Console.WriteLine("      PROMETHEUS_MSSQL_LogLevel");
-            Console.WriteLine("      PROMETHEUS_MSSQL_LogFilePath");
+            Console.WriteLine("      PROMETHEUS_MSSQL_Serilog__MinimumLevel");
         }
 
         public static void RunWebServer(string[] args)
@@ -65,34 +61,26 @@ namespace mssql_exporter.server
                 {"-ServerPath", "ServerPath"},
                 {"-ServerPort", "ServerPort"},
                 {"-AddExporterMetrics", "AddExporterMetrics"},
-                {"-LogLevel", "LogLevel"},
                 {"-ConfigText", "ConfigText"}
             };
 
             var config = new ConfigurationBuilder()
                 .AddJsonFile("config.json", true, false)
+                .AddJsonFile("appsettings.json", true, false)
                 .AddEnvironmentVariables("PROMETHEUS_MSSQL_")
                 .AddCommandLine(args, switchMappings)
                 .Build();
             IConfigure configurationBinding = new ConfigurationOptions();
             config.Bind(configurationBinding);
 
-            var loggingLevel = LogEventLevel.Error;
-            if (!string.IsNullOrWhiteSpace(configurationBinding.LogLevel) &&
-                Enum.TryParse(configurationBinding.LogLevel, true, out LogEventLevel result))
-            {
-                loggingLevel = result;
-            }
-
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Warning()
-                .MinimumLevel.Is(loggingLevel)
                 .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .WriteTo.File(TryGetAbsolutePath(configurationBinding.LogFilePath))
+                //Logging setup above is a default in case load from configuration doesn't override.
+                .ReadFrom.Configuration(config)
                 .CreateLogger();
 
-            Log.Logger.Information("ServerPath {ServerPath}; ServerPort {ServerPort}; AddExporterMetrics {AddExporterMetrics}; LogLevel {LogLevel}", configurationBinding.ServerPath, configurationBinding.ServerPort, configurationBinding.AddExporterMetrics, configurationBinding.LogLevel);
+            Log.Logger.Information("ServerPath {ServerPath}; ServerPort {ServerPort}; AddExporterMetrics {AddExporterMetrics}", configurationBinding.ServerPath, configurationBinding.ServerPort, configurationBinding.AddExporterMetrics);
             if (string.IsNullOrWhiteSpace(configurationBinding.DataSource))
             {
                 Log.Logger.Error("Expected DataSource: SQL Server connectionString");

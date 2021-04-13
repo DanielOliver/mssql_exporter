@@ -36,12 +36,6 @@
         bool AddExporterMetrics { get; set; }
 
         /// <summary>
-        /// The default level to log at.
-        /// </summary>
-        /// <example>Error</example>
-        string LogLevel { get; set; }
-
-        /// <summary>
         /// Gets or sets the log file path.
         /// </summary>
         /// <value>
