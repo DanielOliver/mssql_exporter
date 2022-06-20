@@ -3,9 +3,9 @@
 MSSQL Exporter for Prometheus
 
 
-| Azure Devops | GitHub | Docker Hub |
+| GitHub Actions | GitHub | Docker Hub |
 |---:|:---:|:---|
-| [![Publish Docker image](https://github.com/DanielOliver/mssql_exporter/actions/workflows/dockerfilepublish.yaml/badge.svg)](https://github.com/DanielOliver/mssql_exporter/actions/workflows/dockerfilepublish.yaml) | [![GitHub release](https://img.shields.io/github/release/DanielOliver/mssql_exporter.svg)](https://github.com/DanielOliver/mssql_exporter/releases/latest) | [![Docker Hub](https://img.shields.io/docker/cloud/build/danieloliver/mssql_exporter)](https://hub.docker.com/r/danieloliver/mssql_exporter)
+| [![Build Dockerfile check](https://github.com/DanielOliver/mssql_exporter/actions/workflows/dockerimage.yaml/badge.svg)](https://github.com/DanielOliver/mssql_exporter/actions/workflows/dockerimage.yaml) | [![GitHub release](https://img.shields.io/github/release/DanielOliver/mssql_exporter.svg)](https://github.com/DanielOliver/mssql_exporter/releases/latest) | [![Docker Hub](https://img.shields.io/docker/pulls/danieloliver/mssql_exporter)](https://hub.docker.com/r/danieloliver/mssql_exporter)
 
 ## Quickstart docker-compose
 
@@ -19,7 +19,7 @@ docker-compose.yml
 version: '3'
 services:
   mssql_exporter:
-    build: "danieloliver/mssql_exporter:latest"
+    image: "danieloliver/mssql_exporter:latest"
     ports:
       - "80:80"
     depends_on:
@@ -34,22 +34,60 @@ services:
       - |
         PROMETHEUS_MSSQL_ConfigText=
         {
-            "Queries": [
+          "Queries": [
+            {
+              "Name": "mssql_process_status",
+              "Query": "SELECT status, COUNT(*) count FROM sys.sysprocesses GROUP BY status",
+              "Description": "Counts the number of processes per status",
+              "Usage": "GaugesWithLabels",
+              "Columns": [
                 {
-                    "Name": "mssql_deadlocks",
-                    "Query": "SELECT cntr_value FROM sys.dm_os_performance_counters where counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'",
-                    "Description": "Number of lock requests per second that resulted in a deadlock since last restart",
-                    "Columns": [
-                        {
-                            "Name": "cntr_value",
-                            "Label": "mssql_deadlocks",
-                            "Usage": "Gauge",
-                            "DefaultValue": 0
-                        }
-                    ]
+                  "Name": "status",
+                  "Label": "status",
+                  "Usage": "GaugeLabel",
+                  "Order": 0
+                },
+                {
+                  "Name": "count",
+                  "Label": "count",
+                  "Usage": "Gauge"
                 }
-            ],
-            "MillisecondTimeout": 4000
+              ]
+            },
+            {
+              "Name": "mssql_process_connections",
+              "Query": "SELECT ISNULL(DB_NAME(dbid), 'other') as dbname, COUNT(dbid) as connections FROM sys.sysprocesses WHERE dbid > 0 GROUP BY dbid",
+              "Description": "Counts the number of connections per db",
+              "Usage": "GaugesWithLabels",
+              "Columns": [
+                {
+                  "Name": "dbname",
+                  "Label": "dbname",
+                  "Usage": "GaugeLabel",
+                  "Order": 0
+                },
+                {
+                  "Name": "connections",
+                  "Label": "count",
+                  "Usage": "Gauge"
+                }
+              ]
+            },
+            {
+              "Name": "mssql_deadlocks",
+              "Query": "SELECT cntr_value FROM sys.dm_os_performance_counters where counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'",
+              "Description": "Number of lock requests per second that resulted in a deadlock since last restart",
+              "Columns": [
+                {
+                  "Name": "cntr_value",
+                  "Label": "mssql_deadlocks",
+                  "Usage": "Gauge",
+                  "DefaultValue": 0
+                }
+              ]
+            }
+          ],
+          "MillisecondTimeout": 4000
         }
   sqlserver.dev:
     image: "mcr.microsoft.com/mssql/server:2017-latest"
@@ -68,41 +106,60 @@ services:
 
 ```json
 {
-    "Queries": [
+  "Queries": [
+    {
+      "Name": "mssql_process_status",
+      "Query": "SELECT status, COUNT(*) count FROM sys.sysprocesses GROUP BY status",
+      "Description": "Counts the number of processes per status",
+      "Usage": "GaugesWithLabels",
+      "Columns": [
         {
-            "Name": "mssql_process_status",
-            "Query": "SELECT status, COUNT(*) count FROM sys.sysprocesses GROUP BY status",
-            "Description": "Counts the number of processes per status",
-            "Usage": "GaugesWithLabels",
-            "Columns": [
-                {
-                    "Name": "status",
-                    "Label": "status",
-                    "Usage": "GaugeLabel",
-                    "Order": 0
-                },
-                {
-                    "Name": "count",
-                    "Label": "count",
-                    "Usage": "Gauge"
-                }
-            ]
+          "Name": "status",
+          "Label": "status",
+          "Usage": "GaugeLabel",
+          "Order": 0
         },
         {
-            "Name": "mssql_deadlocks",
-            "Query": "SELECT cntr_value FROM sys.dm_os_performance_counters where counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'",
-            "Description": "Number of lock requests per second that resulted in a deadlock since last restart",
-            "Columns": [
-                {
-                    "Name": "cntr_value",
-                    "Label": "mssql_deadlocks",
-                    "Usage": "Gauge",
-                    "DefaultValue": 0
-                }
-            ]
+          "Name": "count",
+          "Label": "count",
+          "Usage": "Gauge"
         }
-    ],
-    "MillisecondTimeout": 4000
+      ]
+    },
+    {
+      "Name": "mssql_process_connections",
+      "Query": "SELECT ISNULL(DB_NAME(dbid), 'other') as dbname, COUNT(dbid) as connections FROM sys.sysprocesses WHERE dbid > 0 GROUP BY dbid",
+      "Description": "Counts the number of connections per db",
+      "Usage": "GaugesWithLabels",
+      "Columns": [
+        {
+          "Name": "dbname",
+          "Label": "dbname",
+          "Usage": "GaugeLabel",
+          "Order": 0
+        },
+        {
+          "Name": "connections",
+          "Label": "count",
+          "Usage": "Gauge"
+        }
+      ]
+    },
+    {
+      "Name": "mssql_deadlocks",
+      "Query": "SELECT cntr_value FROM sys.dm_os_performance_counters where counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'",
+      "Description": "Number of lock requests per second that resulted in a deadlock since last restart",
+      "Columns": [
+        {
+          "Name": "cntr_value",
+          "Label": "mssql_deadlocks",
+          "Usage": "Gauge",
+          "DefaultValue": 0
+        }
+      ]
+    }
+  ],
+  "MillisecondTimeout": 4000
 }
 ```
 
@@ -122,24 +179,27 @@ or
 
 Content should look like 
 ```txt
-# HELP mssql_up mssql_up
-# TYPE mssql_up gauge
-mssql_up 1
-# HELP mssql_exceptions Number of queries throwing exceptions.
-# TYPE mssql_exceptions gauge
-mssql_exceptions 0
 # HELP mssql_process_status Counts the number of processes per status
 # TYPE mssql_process_status gauge
-mssql_process_status{status="runnable"} 1
-mssql_process_status{status="suspended"} 1
-mssql_process_status{status="background"} 86
-mssql_process_status{status="sleeping"} 28
+mssql_process_status{status="runnable"} 2
+mssql_process_status{status="sleeping"} 19
+mssql_process_status{status="background"} 24
+# HELP mssql_process_connections Counts the number of connections per db
+# TYPE mssql_process_connections gauge
+mssql_process_connections{dbname="master"} 29
+mssql_process_connections{dbname="tempdb"} 1
 # HELP mssql_timeouts Number of queries timing out.
 # TYPE mssql_timeouts gauge
 mssql_timeouts 0
+# HELP mssql_exceptions Number of queries throwing exceptions.
+# TYPE mssql_exceptions gauge
+mssql_exceptions 0
 # HELP mssql_deadlocks mssql_deadlocks
 # TYPE mssql_deadlocks gauge
 mssql_deadlocks 0
+# HELP mssql_up mssql_up
+# TYPE mssql_up gauge
+mssql_up 1
 ```
 
 _Note_

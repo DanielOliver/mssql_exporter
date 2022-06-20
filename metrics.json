@@ -1,37 +1,56 @@
 {
-    "Queries": [
+  "Queries": [
+    {
+      "Name": "mssql_process_status",
+      "Query": "SELECT status, COUNT(*) count FROM sys.sysprocesses GROUP BY status",
+      "Description": "Counts the number of processes per status",
+      "Usage": "GaugesWithLabels",
+      "Columns": [
         {
-            "Name": "mssql_process_status",
-            "Query": "SELECT status, COUNT(*) count FROM sys.sysprocesses GROUP BY status",
-            "Description": "Counts the number of processes per status",
-            "Usage": "GaugesWithLabels",
-            "Columns": [
-                {
-                    "Name": "status",
-                    "Label": "status",
-                    "Usage": "GaugeLabel",
-                    "Order": 0
-                },
-                {
-                    "Name": "count",
-                    "Label": "count",
-                    "Usage": "Gauge"
-                }
-            ]
+          "Name": "status",
+          "Label": "status",
+          "Usage": "GaugeLabel",
+          "Order": 0
         },
         {
-            "Name": "mssql_deadlocks",
-            "Query": "SELECT cntr_value FROM sys.dm_os_performance_counters where counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'",
-            "Description": "Number of lock requests per second that resulted in a deadlock since last restart",
-            "Columns": [
-                {
-                    "Name": "cntr_value",
-                    "Label": "mssql_deadlocks",
-                    "Usage": "Gauge",
-                    "DefaultValue": 0
-                }
-            ]
+          "Name": "count",
+          "Label": "count",
+          "Usage": "Gauge"
         }
-    ],
-    "MillisecondTimeout": 4000
+      ]
+    },
+    {
+      "Name": "mssql_process_connections",
+      "Query": "SELECT ISNULL(DB_NAME(dbid), 'other') as dbname, COUNT(dbid) as connections FROM sys.sysprocesses WHERE dbid > 0 GROUP BY dbid",
+      "Description": "Counts the number of connections per db",
+      "Usage": "GaugesWithLabels",
+      "Columns": [
+        {
+          "Name": "dbname",
+          "Label": "dbname",
+          "Usage": "GaugeLabel",
+          "Order": 0
+        },
+        {
+          "Name": "connections",
+          "Label": "count",
+          "Usage": "Gauge"
+        }
+      ]
+    },
+    {
+      "Name": "mssql_deadlocks",
+      "Query": "SELECT cntr_value FROM sys.dm_os_performance_counters where counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'",
+      "Description": "Number of lock requests per second that resulted in a deadlock since last restart",
+      "Columns": [
+        {
+          "Name": "cntr_value",
+          "Label": "mssql_deadlocks",
+          "Usage": "Gauge",
+          "DefaultValue": 0
+        }
+      ]
+    }
+  ],
+  "MillisecondTimeout": 4000
 }
