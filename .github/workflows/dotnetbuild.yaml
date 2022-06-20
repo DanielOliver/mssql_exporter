@@ -25,7 +25,9 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
       - name: Install dependencies
-        run: dotnet restore
+        run: |
+          cd ./src/
+          dotnet restore
       - name: Build
         run: |
           cd ./src/server
@@ -49,7 +51,9 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
       - name: Install dependencies
-        run: dotnet restore
+        run: |
+          cd ./src/
+          dotnet restore
       - name: Build
         run: |
           cd ./src/server
