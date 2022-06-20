@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
@@ -17,7 +17,7 @@ COPY metrics.json ./
 WORKDIR /app/server
 RUN dotnet publish -c Release -r linux-x64 -o out -p:PublishSingleFile=true --self-contained true -p:PublishTrimmed=true
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
 EXPOSE 80
 WORKDIR /app
 COPY --from=build /app/server/out ./

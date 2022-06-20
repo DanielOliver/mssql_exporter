@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <AssemblyName>mssql_exporter</AssemblyName>
     <RootNamespace>mssql_exporter.server</RootNamespace>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
-    <LangVersion>8</LangVersion>
+    <LangVersion>10</LangVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>    
   </PropertyGroup>
   
