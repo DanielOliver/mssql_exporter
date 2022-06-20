@@ -5,7 +5,7 @@ MSSQL Exporter for Prometheus
 
 | GitHub Actions | GitHub | Docker Hub |
 |---:|:---:|:---|
-| [![Build Dockerfile check](https://github.com/DanielOliver/mssql_exporter/actions/workflows/dockerimage.yaml/badge.svg)](https://github.com/DanielOliver/mssql_exporter/actions/workflows/dockerimage.yaml) | [![GitHub release](https://img.shields.io/github/release/DanielOliver/mssql_exporter.svg)](https://github.com/DanielOliver/mssql_exporter/releases/latest) | [![Docker Hub](https://img.shields.io/docker/pulls/danieloliver/mssql_exporter)](https://hub.docker.com/r/danieloliver/mssql_exporter)
+| [![Build Dockerfile check](https://github.com/DanielOliver/mssql_exporter/actions/workflows/dockerimage.yaml/badge.svg)](https://github.com/DanielOliver/mssql_exporter/actions/workflows/dockerimage.yaml) | [![GitHub release](https://img.shields.io/github/release/DanielOliver/mssql_exporter.svg)](https://github.com/DanielOliver/mssql_exporter/releases/latest) | [![Docker Hub](https://img.shields.io/docker/pulls/danieloliver/mssql_exporter)](https://hub.docker.com/r/danieloliver/mssql_exporter) |
 
 ## Quickstart docker-compose
 
